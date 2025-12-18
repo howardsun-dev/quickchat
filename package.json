@@ -1,0 +1,27 @@
+{
+  "name": "quickchat",
+  "version": "0.1.0",
+  "description": "websocket chat  using socket-io",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/howardsun-dev/quickchat.git"
+  },
+  "keywords": [
+    "chat",
+    "typescript",
+    "javascript",
+    "socket",
+    "io",
+    "websocket"
+  ],
+  "author": "Howard Sun <howardsun@pm.me> (https://howardsun.dev/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/howardsun-dev/quickchat/issues"
+  },
+  "homepage": "https://github.com/howardsun-dev/quickchat#readme"
+}
