@@ -2,12 +2,12 @@ import jwt from 'jsonwebtoken';
 import type { Response } from 'express';
 
 export const generateToken = (userId: string, res: Response): String => {
-  const jwtSecret = process.env.JWT_SECRET;
+  const { JWT_SECRET } = process.env;
 
-  if (!jwtSecret) {
+  if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not set');
   }
-  const token = jwt.sign({ userId }, jwtSecret, {
+  const token = jwt.sign({ userId }, JWT_SECRET, {
     expiresIn: '7d',
   });
 
