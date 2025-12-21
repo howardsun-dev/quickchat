@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.ts';
 import type { Request, Response } from 'express';
 import { generateToken } from '../lib/utils.ts';
+import { Resend } from 'resend';
 
 interface SignupRequest {
   fullName: string;
@@ -60,6 +61,12 @@ export const signup = async (
         fullName: newUser.fullName,
         email: newUser.email,
         profilePic: newUser.profilePic,
+      });
+
+      resend.emailssend({
+        from: 'quickchat@resend.dev',
+        to: newUser.email,
+        subject: 'Hello, world',
       });
 
       // TODO: Send a welcome email to user
