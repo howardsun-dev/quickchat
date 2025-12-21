@@ -25,17 +25,17 @@ if (process.env.NODE_ENV == 'production') {
     res.sendFile(path.join(__dirname, '../frontend', 'dist', 'index.html'));
   });
 }
-// app.listen(PORT, () => {
-//   console.log('Server is running at port: ' + PORT);
-//   connectDB();
-// });
-connectDB()
-  .then(() => {
+
+async function startServer() {
+  try {
+    await connectDB();
     app.listen(PORT, () => {
       console.log(`Server running on port: ${PORT}`);
     });
-  })
-  .catch((err) => {
+  } catch (err) {
     console.error('Failed to connect to DB:', err);
     process.exit(1);
-  });
+  }
+}
+
+startServer();
