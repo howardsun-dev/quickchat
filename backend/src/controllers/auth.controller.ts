@@ -69,7 +69,11 @@ export const signup = async (
           savedUser.fullName,
           ENV.CLIENT_URL
         );
-      } catch (error) {}
+
+        console.log(console.log(ENV.EMAIL_FROM));
+      } catch (error) {
+        console.error('Failed to send welcome email: ', error);
+      }
     } else {
       res.status(400).json({ message: 'Invalid user data' });
     }
