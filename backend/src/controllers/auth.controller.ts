@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.ts';
 import type { Request, Response } from 'express';
 import { generateToken } from '../lib/utils.ts';
+import { sendWelcomeEmail } from '../emails/emailHandlers.ts';
+import { ENV } from '../lib/env.ts';
 
 interface SignupRequest {
   fullName: string;
@@ -51,9 +53,8 @@ export const signup = async (
     });
 
     if (newUser) {
-      generateToken(newUser._id.toString(), res);
-
-      await newUser.save();
+      const savedUser = await newUser.save();
+      generateToken(savedUser._id.toString(), res);
 
       res.status(201).json({
         _id: newUser._id,
@@ -62,7 +63,13 @@ export const signup = async (
         profilePic: newUser.profilePic,
       });
 
-      // TODO: Send a welcome email to user
+      try {
+        await sendWelcomeEmail(
+          savedUser.email,
+          savedUser.fullName,
+          ENV.CLIENT_URL
+        );
+      } catch (error) {}
     } else {
       res.status(400).json({ message: 'Invalid user data' });
     }
