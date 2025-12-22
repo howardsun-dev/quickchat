@@ -69,8 +69,6 @@ export const signup = async (
           savedUser.fullName,
           ENV.CLIENT_URL
         );
-
-        console.log(console.log(ENV.EMAIL_FROM));
       } catch (error) {
         console.error('Failed to send welcome email: ', error);
       }
