@@ -114,6 +114,17 @@ export const login = async (
   }
 };
 
-export const logout = async (req: any, res: any) => {
-  res.status(200).json({ message: 'Logout endpoint' });
+export const logout = async (
+  _: any,
+  res: {
+    cookie: (arg0: string, arg1: string, arg2: { maxAge: number }) => void;
+    status: (arg0: number) => {
+      (): any;
+      new (): any;
+      json: { (arg0: { message: string }): void; new (): any };
+    };
+  }
+) => {
+  res.cookie('jwt', '', { maxAge: 0 });
+  res.status(200).json({ message: 'Logout successfully' });
 };
