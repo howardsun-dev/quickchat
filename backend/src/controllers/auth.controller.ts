@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.ts';
 import type { Request, Response } from 'express';
@@ -78,5 +77,13 @@ export const signup = async (
   } catch (error: unknown) {
     console.log('Error in sign up controller', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
   }
 };
