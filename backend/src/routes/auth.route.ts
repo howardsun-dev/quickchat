@@ -1,13 +1,23 @@
 import express from 'express';
 import type { RequestHandler } from 'express';
-import { login, logout, signup } from '../controllers/auth.controller.ts';
+import {
+  login,
+  logout,
+  signup,
+  updateProfile,
+} from '../controllers/auth.controller.ts';
+import { protectRoute } from '../middleware/auth.middleware.ts';
 
 const router = express.Router();
 
-router.post('/signup', signup as RequestHandler);
+router.post('/signup', signup);
+router.post('/login', login);
+router.post('/logout', logout);
 
-router.post('/login', login as RequestHandler);
+router.put('/update-profile', protectRoute, updateProfile);
 
-router.post('/logout', logout as RequestHandler);
+router.get('/check', protectRoute, (req, res) => {
+  res.status(200).json(req.user);
+});
 
 export default router;
