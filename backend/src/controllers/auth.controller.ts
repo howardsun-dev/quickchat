@@ -123,7 +123,7 @@ export const logout = async (
   res.status(200).json({ message: 'Logout successfully' });
 };
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req: Request, res: Response) => {
   try {
     const { profilePic } = req.body;
     if (!profilePic)
