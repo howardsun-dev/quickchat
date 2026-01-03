@@ -7,7 +7,7 @@ import type { Request, Response, NextFunction } from 'express';
 declare global {
   namespace Express {
     interface Request {
-      user?: Document & {
+      user: Document & {
         email: string;
         fullName: string;
         password?: string;
