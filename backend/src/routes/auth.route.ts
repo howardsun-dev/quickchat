@@ -7,8 +7,15 @@ import {
   updateProfile,
 } from '../controllers/auth.controller.ts';
 import { protectRoute } from '../middleware/auth.middleware.ts';
+import { arcjetProtection } from '../middleware/arcjet.middleware.ts';
 
 const router = express.Router();
+
+router.use(arcjetProtection);
+
+// router.get('/testlogin', arcjetProtection, (req, res) => {
+//   res.json({ message: 'Arcjet Test Route' });
+// });
 
 router.post('/signup', signup);
 router.post('/login', login);

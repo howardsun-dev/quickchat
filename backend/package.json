@@ -14,6 +14,8 @@
   "author": "Howard Sun <howardsun@pm.me> (https://howardsun.dev/)",
   "license": "MIT",
   "dependencies": {
+    "@arcjet/inspect": "1.0.0-beta.16",
+    "@arcjet/node": "1.0.0-beta.16",
     "bcryptjs": "2.4.3",
     "cloudinary": "2.8.0",
     "cookie-parser": "1.4.7",
