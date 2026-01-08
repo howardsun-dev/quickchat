@@ -1,5 +1,6 @@
 import Message from '../models/Message.ts';
 import type { Request, Response, NextFunction } from 'express';
+import { Types } from 'mongoose';
 import User from '../models/User.ts';
 import cloudinary from '../lib/cloudinary.ts';
 
@@ -39,7 +40,22 @@ export const sentMessage = async (req: Request, res: Response) => {
   try {
     const { text, image } = req.body;
     const { id: receiverId } = req.params;
-    const senderId = req.user._id;
+    const senderId = (req.user as { _id: Types.ObjectId })._id;
+
+    if (!text && !image) {
+      return res
+        .status(400)
+        .json({ error: 'Message must contain text or an image' });
+    }
+
+    if (senderId.equals(receiverId)) {
+      return res.status(400).json({ error: 'Cannot send message to yourself' });
+    }
+
+    const receiverExists = await User.exists({ _id: receiverId });
+    if (!receiverExists) {
+      return res.status(404).json({ error: 'Receiver not found' });
+    }
 
     let imageUrl;
     if (image) {
