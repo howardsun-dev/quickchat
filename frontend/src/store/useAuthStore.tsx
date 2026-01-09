@@ -14,7 +14,7 @@ interface AuthState {
   isLoggingIn: boolean;
   socket: unknown | null;
   onlineUsers: string[];
-  //   checkAuth: () => Promise<void>;
+  checkAuth: () => Promise<void>;
   signup: (data: signupData) => Promise<void>;
 }
 
@@ -30,8 +30,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await axiosInstance.get('/auth/check');
       set({ authUser: res.data });
+      // get().connectSocket();
     } catch (error) {
-      console.log('Error in authCheck', error);
+      console.log('Error in authCheck:', error);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
