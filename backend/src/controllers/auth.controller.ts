@@ -6,14 +6,19 @@ import { sendWelcomeEmail } from '../emails/emailHandlers.ts';
 import { ENV } from '../lib/env.ts';
 import cloudinary from '../lib/cloudinary.ts';
 
-interface SignupRequest {
+interface SignupBody {
   fullName: string;
   email: string;
   password: string;
 }
 
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
 export const signup = async (
-  req: Request<{}, {}, SignupRequest>,
+  req: Request<{}, {}, SignupBody>,
   res: Response
 ): Promise<void> => {
   const { fullName, email, password } = req.body;
@@ -81,10 +86,7 @@ export const signup = async (
   }
 };
 
-export const login = async (
-  req: { body: { email: any; password: any } },
-  res: Response<any, Record<string, any>>
-) => {
+export const login = async (req: Request<{}, {}, LoginBody>, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -115,21 +117,21 @@ export const login = async (
   }
 };
 
-export const logout = async (
-  _: any,
-  res: Response<any, Record<string, any>>
-) => {
+export const logout = async (_req: Request, res: Response) => {
   res.cookie('jwt', '', { maxAge: 0 });
   res.status(200).json({ message: 'Logout successfully' });
 };
 
-export const updateProfile = async (req: Request, res: Response) => {
+export const updateProfile = async (
+  req: Request<{ userId: string }>,
+  res: Response
+) => {
   try {
     const { profilePic } = req.body;
     if (!profilePic)
       return res.status(400).json({ message: 'Profile pic is required' });
 
-    const userId = req.user._id;
+    const userId = (req.user as any)._id; // Fix with proper typing as needed
 
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
 
