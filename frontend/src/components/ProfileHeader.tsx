@@ -1,7 +1,14 @@
-import React from 'react';
+import { useAuthStore } from '../store/useAuthStore';
 
 function ProfileHeader() {
-  return <div>ProfileHeader</div>;
+  const { logout } = useAuthStore();
+
+  return (
+    <div className="z-10">
+      Profile Header
+      <button onClick={logout}>Log out</button>
+    </div>
+  );
 }
 
 export default ProfileHeader;
