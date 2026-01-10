@@ -3,11 +3,6 @@ import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 import { isAxiosError } from 'axios';
 
-interface signupData {
-  fullName: string;
-  email: string;
-  password: string;
-}
 interface AuthState {
   authUser: unknown | null;
   isCheckingAuth: boolean;
@@ -24,6 +19,11 @@ interface AuthActions {
 }
 
 type StoreState = AuthState & AuthActions;
+interface signupData {
+  fullName: string;
+  email: string;
+  password: string;
+}
 
 interface LoginData {
   email: string;
