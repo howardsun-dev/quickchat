@@ -1,0 +1,37 @@
+<!-- QuickChat Favicon SVG - Exact match to your image [file:283] -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Precise purple-blue gradient from image -->
+    <linearGradient id="qcGrad" x1="15%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="50%" stop-color="#764ba2"/>
+      <stop offset="100%" stop-color="#f093fb"/>
+    </linearGradient>
+    
+    <!-- Glow filter -->
+    <filter id="qcGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4"/>
+    </filter>
+  </defs>
+  
+  <!-- Chat bubble with lightning (exact image proportions) -->
+  <g transform="translate(256, 256)" filter="url(#qcGlow)">
+    <!-- Main bubble body -->
+    <path d="M-150 -110 Q-150 -230 0 -230 Q150 -230 150 -110 L150 110 Q150 230 0 230 Q-150 230 -150 110 Z" 
+          fill="url(#qcGrad)"
+          stroke="none"/>
+    
+    <!-- Speech bubble tail (matches image curve) -->
+    <path d="M110 85 Q155 135 175 95 Q195 55 155 35 L110 75 Z" 
+          fill="url(#qcGrad)"/>
+    
+    <!-- Centered lightning bolt (white stroke, image exact) -->
+    <path d="M-65 25 L-35 5 L-20 55 L0 15 L20 65 L35 5" 
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="16"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-miterlimit="10"/>
+  </g>
+</svg>
