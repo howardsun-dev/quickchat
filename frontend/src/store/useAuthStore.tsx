@@ -3,16 +3,18 @@ import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 import { isAxiosError } from 'axios';
 
-interface signupData {
+interface User {
+  _id: string;
   fullName: string;
   email: string;
-  password: string;
+  profilePic: string;
 }
 interface AuthState {
-  authUser: unknown | null;
+  authUser: User | null;
   isCheckingAuth: boolean;
   isSigningUp: boolean;
   isLoggingIn: boolean;
+  isUploading: boolean;
   socket: unknown | null;
   onlineUsers: string[];
 }
@@ -21,9 +23,15 @@ interface AuthActions {
   signup: (data: signupData) => Promise<void>;
   login: (data: LoginData) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (data: { profilePic: string }) => Promise<void>;
 }
 
 type StoreState = AuthState & AuthActions;
+interface signupData {
+  fullName: string;
+  email: string;
+  password: string;
+}
 
 interface LoginData {
   email: string;
@@ -35,6 +43,7 @@ export const useAuthStore = create<StoreState>((set) => ({
   isCheckingAuth: true,
   isSigningUp: false,
   isLoggingIn: false,
+  isUploading: false,
   socket: null,
   onlineUsers: [],
 
@@ -114,6 +123,33 @@ export const useAuthStore = create<StoreState>((set) => ({
 
       console.error('Logout error:', error);
       toast.error('Logout failed');
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({ isUploading: true });
+
+    try {
+      const res = await axiosInstance.put('/auth/update-profile', data);
+      set({ authUser: res.data });
+      toast.success('Profile updated successfully');
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'response' in error &&
+        error.response
+      ) {
+        const axiosError = error as {
+          response: { data: { message: string } };
+        };
+        console.log('Error in update profile:', error);
+        toast.error(axiosError.response.data.message);
+      } else {
+        toast.error('Error in update profile');
+      }
+    } finally {
+      set({ isUploading: false });
     }
   },
 }));
