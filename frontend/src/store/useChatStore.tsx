@@ -81,7 +81,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     set({ isUsersLoading: true });
 
     try {
-      const res = await axiosInstance.get('messages/contacts');
+      const res = await axiosInstance.get('/messages/contacts');
       set({ allContacts: res.data });
     } catch (error: unknown) {
       handleError(error, 'Failed to fetch contacts');
@@ -93,7 +93,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   getMyChatPartners: async () => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get('messages/chats');
+      const res = await axiosInstance.get('/messages/chats');
       set({ chats: res.data });
     } catch (error: unknown) {
       handleError(error, 'Failed to fetch chat partners');
