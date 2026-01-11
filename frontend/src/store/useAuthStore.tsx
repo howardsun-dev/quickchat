@@ -15,7 +15,7 @@ interface AuthState {
   isSigningUp: boolean;
   isLoggingIn: boolean;
   isUploading: boolean;
-  socket: unknown | null;
+  socket: WebSocket | null;
   onlineUsers: string[];
 }
 interface AuthActions {
@@ -38,6 +38,14 @@ interface LoginData {
   password: string;
 }
 
+const handleError = (error: unknown, fallback: string = 'Error occurred') => {
+  if (isAxiosError(error)) {
+    toast.error(error.response?.data?.message ?? fallback);
+    return;
+  }
+  toast.error(fallback);
+};
+
 export const useAuthStore = create<StoreState>((set) => ({
   authUser: null,
   isCheckingAuth: true,
@@ -52,15 +60,16 @@ export const useAuthStore = create<StoreState>((set) => ({
       const res = await axiosInstance.get('/auth/check');
       set({ authUser: res.data });
       // get().connectSocket();
-    } catch (error) {
-      console.log('Error in authCheck:', error);
+    } catch (error: unknown) {
+      console.error('Auth check failed:', error);
+      handleError(error, 'Authentication check failed');
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
     }
   },
 
-  signup: async (data) => {
+  signup: async (data: signupData) => {
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post('/auth/signup', data);
@@ -69,17 +78,7 @@ export const useAuthStore = create<StoreState>((set) => ({
 
       toast.success('Account created successfully');
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === 'object' &&
-        'response' in error &&
-        error.response
-      ) {
-        const axiosError = error as { response: { data: { message: string } } };
-        toast.error(axiosError.response.data.message);
-      } else {
-        toast.error('Signup failed');
-      }
+      handleError(error, 'Signup failed');
     } finally {
       set({ isSigningUp: false });
     }
@@ -94,15 +93,7 @@ export const useAuthStore = create<StoreState>((set) => ({
 
       toast.success('Logged in successfully');
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === 'object' &&
-        'response' in error &&
-        error.response
-      ) {
-        const axiosError = error as { response: { data: { message: string } } };
-        toast.error(axiosError.response.data.message);
-      }
+      handleError(error, 'Login failed');
     } finally {
       set({ isLoggingIn: false });
     }
@@ -112,7 +103,6 @@ export const useAuthStore = create<StoreState>((set) => ({
     try {
       await axiosInstance.post('/auth/logout');
       set({ authUser: null });
-
       toast.success('Logged off successfully');
     } catch (error: unknown) {
       if (isAxiosError(error)) {
@@ -134,20 +124,7 @@ export const useAuthStore = create<StoreState>((set) => ({
       set({ authUser: res.data });
       toast.success('Profile updated successfully');
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === 'object' &&
-        'response' in error &&
-        error.response
-      ) {
-        const axiosError = error as {
-          response: { data: { message: string } };
-        };
-        console.log('Error in update profile:', error);
-        toast.error(axiosError.response.data.message);
-      } else {
-        toast.error('Error in update profile');
-      }
+      handleError(error, 'Profile update failed');
     } finally {
       set({ isUploading: false });
     }
