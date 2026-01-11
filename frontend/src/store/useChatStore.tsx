@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import { handleError } from '../lib/handleError';
-import toast from 'react-hot-toast';
 
 export interface BaseUser {
   _id: string;
