@@ -5,7 +5,7 @@ import NoChatsFound from './NoChatsFound';
 // import { useAuthStore } from '../store/useAuthStore';
 import type { BaseUser } from '../store/useChatStore';
 
-function ChatsList() {
+function ContactList() {
   const { getAllContacts, allContacts, isUsersLoading, setSelectedUser } =
     useChatStore();
   // const { onlineUsers } = useAuthStore();
@@ -44,4 +44,4 @@ function ChatsList() {
   );
 }
 
-export default ChatsList;
+export default ContactList;
