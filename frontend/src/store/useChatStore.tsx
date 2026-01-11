@@ -16,6 +16,7 @@ export interface Message {
   senderId: string;
   receiverId: string;
   text: string;
+  image?: string;
   createdAt: string;
   updatedAt: string;
   __v?: number;
@@ -38,6 +39,7 @@ interface ChatActions {
   setSelectedUser: (user: User | null) => void;
   getAllContacts: () => Promise<void>;
   getMyChatPartners: () => Promise<void>;
+  getMessagesByUserId: (userId: string) => Promise<void>;
 }
 
 type ChatStoreState = ChatState & ChatActions;
@@ -85,6 +87,18 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
       handleError(error, 'Failed to fetch chat partners');
     } finally {
       set({ isUsersLoading: false });
+    }
+  },
+
+  getMessagesByUserId: async (userId) => {
+    set({ isMessagesLoading: true });
+    try {
+      const res = await axiosInstance.get(`/messages/${userId}`);
+      set({ messages: res.data });
+    } catch (error) {
+      handleError(error, 'Failed to fetch messages');
+    } finally {
+      set({ isMessagesLoading: false });
     }
   },
 }));

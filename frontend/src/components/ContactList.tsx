@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
 import UsersLoadingSkeleton from './UsersLoadingSkeleton';
-import NoChatsFound from './NoChatsFound';
 // import { useAuthStore } from '../store/useAuthStore';
 import type { BaseUser } from '../store/useChatStore';
 
@@ -15,7 +14,7 @@ function ContactList() {
   }, [getAllContacts]);
 
   if (isUsersLoading) return <UsersLoadingSkeleton />;
-  if (allContacts.length === 0) return <NoChatsFound />;
+
   return (
     <>
       {allContacts.map((contact: BaseUser) => (
