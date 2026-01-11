@@ -1,19 +1,30 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
-import toast from 'react-hot-toast';
-import { isAxiosError } from 'axios';
+import { handleError } from '../lib/handleError';
 
-interface User {
+export interface BaseUser {
   _id: string;
   fullName: string;
   email: string;
   profilePic: string;
 }
 
+export type User = BaseUser;
+export type ChatPartner = BaseUser;
+export interface Message {
+  _id: string;
+  senderId: string;
+  receiverId: string;
+  text: string;
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
+}
+
 interface ChatState {
-  allContacts: [];
-  chats: [];
-  messages: [];
+  allContacts: ChatPartner[];
+  chats: ChatPartner[];
+  messages: Message[];
   activeTab: 'chats' | 'contacts';
   selectedUser: User | null;
   isUsersLoading: boolean;
@@ -56,14 +67,10 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     set({ isUsersLoading: true });
 
     try {
-      const res = await axiosInstance.get('messages/contacts');
+      const res = await axiosInstance.get('/messages/contacts');
       set({ allContacts: res.data });
     } catch (error: unknown) {
-      if (isAxiosError(error)) {
-        toast.error(error.response?.data?.message ?? 'Error occurred');
-        return;
-      }
-      toast.error('Unexpected Error');
+      handleError(error, 'Failed to fetch contacts');
     } finally {
       set({ isUsersLoading: false });
     }
@@ -72,14 +79,10 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   getMyChatPartners: async () => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get('messages/chats');
+      const res = await axiosInstance.get('/messages/chats');
       set({ chats: res.data });
-    } catch (error) {
-      if (isAxiosError(error)) {
-        toast.error(error.response?.data?.message ?? 'Error occurred');
-        return;
-      }
-      toast.error('Unexpected Error');
+    } catch (error: unknown) {
+      handleError(error, 'Failed to fetch chat partners');
     } finally {
       set({ isUsersLoading: false });
     }
