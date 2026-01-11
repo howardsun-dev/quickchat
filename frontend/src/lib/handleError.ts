@@ -5,6 +5,7 @@ export const handleError = (
   error: unknown,
   fallback: string = 'Error occurred'
 ) => {
+  console.error('Store error:', error);
   if (isAxiosError(error)) {
     toast.error(error.response?.data?.message ?? fallback);
     return;
