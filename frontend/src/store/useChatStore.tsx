@@ -95,12 +95,6 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
-      if (res.data.length === 0) {
-        toast.error('No existing conversation');
-        set({ messages: [] });
-        return;
-      }
-
       set({ messages: res.data });
     } catch (error) {
       handleError(error, 'Failed to fetch messages');
