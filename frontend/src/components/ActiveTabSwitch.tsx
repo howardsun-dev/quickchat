@@ -1,5 +1,12 @@
 import { useChatStore } from '../store/useChatStore';
 
+/**
+ * Renders a two-button tab switch that reads and updates the chat store's active tab.
+ *
+ * Shows "Chats" and "Contacts" buttons with conditional active styling; clicking a button sets the corresponding tab in the chat store.
+ *
+ * @returns The rendered tab switch element.
+ */
 function ActiveTabSwitch() {
   const { activeTab, setActiveTab } = useChatStore();
   return (
