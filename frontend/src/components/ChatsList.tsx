@@ -5,6 +5,15 @@ import NoChatsFound from './NoChatsFound';
 // import { useAuthStore } from '../store/useAuthStore';
 import type { ChatPartner } from '../store/useChatStore';
 
+/**
+ * Render a list of chat partners with loading and empty states.
+ *
+ * Fetches chat partners on mount, shows a loading skeleton while partners are loading,
+ * displays an empty-state component when there are no chats, and otherwise renders
+ * clickable chat items that set the selected user when clicked.
+ *
+ * @returns A React element that is either the loading skeleton, the empty-state component, or the list of chat partner items.
+ */
 function ChatsList() {
   const { getMyChatPartners, chats, isUsersLoading, setSelectedUser } =
     useChatStore();

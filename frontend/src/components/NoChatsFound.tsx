@@ -1,6 +1,13 @@
 import { MessageCircleIcon } from 'lucide-react';
 import { useChatStore } from '../store/useChatStore';
 
+/**
+ * Display a centered placeholder UI when there are no chat conversations.
+ *
+ * Includes an icon, a heading, explanatory text, and a button that activates the contacts tab.
+ *
+ * @returns A JSX element rendering the "no conversations" placeholder; the button sets the active tab to `'contacts'`.
+ */
 function NoChatsFound() {
   const { setActiveTab } = useChatStore();
 
