@@ -3,20 +3,15 @@ import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 import { isAxiosError } from 'axios';
 
-export interface User {
+export interface BaseUser {
   _id: string;
   fullName: string;
   email: string;
   profilePic: string;
 }
 
-export interface ChatPartner {
-  _id: string;
-  fullName: string;
-  email: string;
-  profilePic: string;
-}
-
+export type User = BaseUser;
+export type ChatPartner = BaseUser;
 export interface Message {
   _id: string;
   senderId: string;
