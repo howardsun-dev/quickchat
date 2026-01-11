@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
 import UsersLoadingSkeleton from './UsersLaoadingSkeleton';
 import NoChatsFound from './NoChatsFound';
-import { useAuthStore } from '../store/useAuthStore';
+// import { useAuthStore } from '../store/useAuthStore';
 import type { ChatPartner } from '../store/useChatStore';
 
 function ChatsList() {
