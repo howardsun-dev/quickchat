@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
-import { isAxiosError } from 'axios';
+import { handleError } from '../lib/handleError';
 
 interface User {
   _id: string;
@@ -37,15 +37,6 @@ interface LoginData {
   email: string;
   password: string;
 }
-
-const handleError = (error: unknown, fallback: string = 'Error occurred') => {
-  if (isAxiosError(error)) {
-    toast.error(error.response?.data?.message ?? fallback);
-    return;
-  }
-  toast.error(fallback);
-};
-
 export const useAuthStore = create<StoreState>((set) => ({
   authUser: null,
   isCheckingAuth: true,
@@ -105,11 +96,7 @@ export const useAuthStore = create<StoreState>((set) => ({
       set({ authUser: null });
       toast.success('Logged off successfully');
     } catch (error: unknown) {
-      if (isAxiosError(error)) {
-        const msg = error.response?.data?.message ?? 'Logged out';
-        toast.error(msg);
-        return;
-      }
+      handleError(error, 'Logout failed');
 
       console.error('Logout error:', error);
       toast.error('Logout failed');
