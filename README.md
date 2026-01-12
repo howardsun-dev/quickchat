@@ -90,16 +90,16 @@ cd frontend
 npm install
 npm run dev
 ```
-
-🧪 Development Notes
+---
+## 🧪 Development Notes
 
 The backend should be running before starting the frontend.
 
 Real‑time features depend on WebSocket connections — ensure the server supports them.
 
 This POC may not include production‑level error handling or security.
-
-📦 Deployment
+---
+##📦 Deployment
 
 Deployment steps depend on your hosting setup:
 
@@ -112,18 +112,18 @@ Frontend
 Deploy to Netlify, Vercel, GitHub Pages, or static hosting.
 
 You may want to configure environment variables for production before deploying.
-
-👥 Contributing
+---
+##👥 Contributing
 
 Contributions are welcome! Please open issues or pull requests with improvements.
-
-📄 License
+---
+##📄 License
 
 This project is licensed under the MIT License.
 See LICENSE
  for details.
-
-❓ Questions
+---
+##❓ Questions
 
 If you have questions or need help, feel free to open an issue on GitHub.
 
