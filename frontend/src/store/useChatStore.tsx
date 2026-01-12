@@ -47,6 +47,8 @@ interface ChatActions {
   getMyChatPartners: () => Promise<void>;
   getMessagesByUserId: (userId: string) => Promise<void>;
   sendMessage: (messageData: SentMessagePayload) => Promise<void>;
+  subscribeToMessages: () => void;
+  unsubscribeFromMessages: () => void;
 }
 
 type ChatStoreState = ChatState & ChatActions;
@@ -146,5 +148,37 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
       set({ messages: messages });
       handleError(error, 'Failed to send messages');
     }
+  },
+
+  subscribeToMessages: () => {
+    /* Implementation for subscribing to messages via WebSocket or similar */
+    const { selectedUser, isSoundEnabled } = get();
+    if (!selectedUser) return;
+
+    const socket = useAuthStore.getState().socket;
+
+    socket?.on('newMessage', (newMessage) => {
+      const isMessageSentFromSelectedUser =
+        newMessage.senderId === selectedUser._id;
+      if (!isMessageSentFromSelectedUser) return;
+
+      const currentMessages = get().messages;
+      set({ messages: [...currentMessages, newMessage] });
+
+      if (isSoundEnabled) {
+        // console.log('🔊Attempting to play sound');
+        const notificationSound = new Audio('/sounds/notification.mp3');
+
+        notificationSound.currentTime = 0;
+        notificationSound
+          .play()
+          .catch((e) => console.log('Notification sound play error:', e));
+      }
+    });
+  },
+
+  unsubscribeFromMessages: () => {
+    const socket = useAuthStore.getState().socket;
+    socket?.off('newMessage');
   },
 }));

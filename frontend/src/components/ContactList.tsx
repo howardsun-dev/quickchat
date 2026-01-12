@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
 import UsersLoadingSkeleton from './UsersLoadingSkeleton';
-// import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../store/useAuthStore';
 import type { BaseUser } from '../store/useChatStore';
 
 function ContactList() {
   const { getAllContacts, allContacts, isUsersLoading, setSelectedUser } =
     useChatStore();
-  // const { onlineUsers } = useAuthStore();
+  const { onlineUsers } = useAuthStore();
 
   useEffect(() => {
     getAllContacts();
@@ -24,8 +24,9 @@ function ContactList() {
           onClick={() => setSelectedUser(contact)}
         >
           <div className="flex items-center gap-3">
-            {/* TODO: FIX ONLINE STATUS w/ SOCKETS */}
-            <div className={'avatar online'}>
+            <div
+              className={`avatar ${onlineUsers.includes(contact._id) ? 'online' : 'offline'}`}
+            >
               <div className="size-12 rounded-full">
                 <img
                   src={contact.profilePic || '/avatar.png'}
