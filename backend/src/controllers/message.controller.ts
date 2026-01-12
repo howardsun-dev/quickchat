@@ -1,8 +1,9 @@
 import Message from '../models/Message.ts';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import User from '../models/User.ts';
 import cloudinary from '../lib/cloudinary.ts';
+import { getReceiverSocketId, io } from '../lib/socket.ts';
 
 export const getAlLContacts = async (req: Request, res: Response) => {
   try {
@@ -73,7 +74,11 @@ export const sentMessage = async (req: Request, res: Response) => {
 
     await newMessage.save();
 
-    // todo: send message in real time if user is online using socketIO
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('newMessage', newMessage);
+    }
+
     res.status(201).json(newMessage);
   } catch (error) {
     if (error instanceof Error) {
