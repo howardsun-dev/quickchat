@@ -40,7 +40,7 @@ Quickchat is a prototype chat app that demonstrates real‑time messaging betwee
 
 ---
 
-## 🛠 Tech Stack *(update as needed)*
+## 🛠 Tech Stack
 
 **Frontend**
 - React
