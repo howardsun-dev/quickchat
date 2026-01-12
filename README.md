@@ -105,7 +105,7 @@ This POC may not include production‑level error handling or security.
 
 ---
 
-##📦 Deployment
+## 📦 Deployment
 
 Deployment steps depend on your hosting setup:
 
@@ -122,14 +122,14 @@ You may want to configure environment variables for production before deploying.
 
 ---
 
-##👥 Contributing
+## 👥 Contributing
 
 Contributions are welcome! Please open issues or pull requests with improvements.
 
 
 ---
 
-##📄 License
+## 📄 License
 
 This project is licensed under the MIT License.
 See LICENSE
@@ -138,7 +138,7 @@ See LICENSE
 
 ---
 
-##❓ Questions
+## ❓ Questions
 
 If you have questions or need help, feel free to open an issue on GitHub.
 
