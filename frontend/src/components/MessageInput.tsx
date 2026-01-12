@@ -27,7 +27,6 @@ function MessageInput() {
     const file = e.target.files?.[0];
 
     if (!file) {
-      toast.error('No file selected');
       return;
     }
 
