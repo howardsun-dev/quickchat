@@ -19,11 +19,17 @@ Quickchat is a prototype chat app that demonstrates real‑time messaging betwee
 ## 📁 Repository Structure
 
 /
+
 ├── backend/ # Server‑side code
+
 ├── frontend/ # Client‑side UI
+
 ├── .vscode/ # Workspace configs
+
 ├── package.json # Monorepo scripts & tooling (if applicable)
+
 ├── LICENSE # MIT License
+
 └── README.md # Project overview (this file)
 
 
