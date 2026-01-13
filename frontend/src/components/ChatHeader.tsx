@@ -46,7 +46,7 @@ function ChatHeader() {
             {isOnline
               ? 'Online'
               : lastSeenDate
-                ? `Last online ⚡: ${lastSeenDate}`
+                ? `Last online ${lastSeenDate}`
                 : 'Offline'}
           </p>
         </div>
