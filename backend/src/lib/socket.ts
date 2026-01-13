@@ -53,9 +53,13 @@ io.on('connection', (socket: AuthedSocket) => {
   //With socket.on you can listen to events from the client
   socket.on('disconnect', async () => {
     // Implement lastSeen
-    await User.findByIdAndUpdate(socket.userId, {
-      lastSeen: new Date(),
-    });
+    try {
+      await User.findByIdAndUpdate(socket.userId, {
+        lastSeen: new Date(),
+      });
+    } catch (error) {
+      console.error('Unable to update online status');
+    }
 
     console.log('Client disconnected', socket.user?.fullName);
 
