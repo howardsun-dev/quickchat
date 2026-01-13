@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 
 function ChatHeader() {
-  const { selectedUser, setSelectedUser } = useChatStore();
+  const { selectedUser, setSelectedUser, lastSeenDate } = useChatStore();
   const { onlineUsers } = useAuthStore();
   const isOnline = selectedUser
     ? onlineUsers.includes(selectedUser._id)
@@ -43,7 +43,7 @@ function ChatHeader() {
             {selectedUser.fullName}
           </h3>
           <p className="text-slate-400 text-sm">
-            {isOnline ? 'Online' : 'Offline'}
+            {isOnline ? 'Online' : lastSeenDate || 'Offline'}
           </p>
         </div>
       </div>

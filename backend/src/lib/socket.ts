@@ -5,8 +5,6 @@ import { ENV } from './env.ts';
 import { socketAuthMiddleware } from '../middleware/socket.auth.middleware.ts';
 import User from '../models/User.ts';
 
-const userSocketMap: Record<string, string> = {}; // #1 GLOBAL ONLY
-
 // Extend Socket type with user fields you attach
 interface AuthedSocket extends Socket {
   user?: typeof User.prototype;
@@ -34,6 +32,8 @@ export function getReceiverSocketId(
   return userSocketMap[userId];
 }
 
+const userSocketMap: Record<string, string> = {}; // #1 GLOBAL ONLY for online users
+
 io.on('connection', (socket: AuthedSocket) => {
   if (!socket.user || !socket.userId) {
     console.log('Unauthenticated socket tried to connect');
@@ -51,8 +51,11 @@ io.on('connection', (socket: AuthedSocket) => {
   io.emit('getOnlineUsers', Object.keys(userSocketMap));
 
   //With socket.on you can listen to events from the client
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
+    // Implement lastSeen
+    await User.findByIdAndUpdate(socket.userId, { lastSeen: new Date() });
     console.log('Client disconnected', socket.user?.fullName);
+
     delete userSocketMap[userId];
     io.emit('getOnlineUsers', Object.keys(userSocketMap));
   });

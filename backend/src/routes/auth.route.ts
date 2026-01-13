@@ -1,5 +1,4 @@
 import express from 'express';
-import type { RequestHandler } from 'express';
 import {
   login,
   logout,
