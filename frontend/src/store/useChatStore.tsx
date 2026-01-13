@@ -9,7 +9,7 @@ export interface BaseUser {
   fullName: string;
   email: string;
   profilePic: string;
-  lastSeen: Date;
+  lastSeen: Date | null;
 }
 
 export type User = BaseUser;
@@ -81,8 +81,11 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     set({ selectedUser: user, lastSeenDate: null });
 
     if (user?._id) {
+      const targetUserId = user._id;
       try {
         const res = await axiosInstance.get(`/user/status/${user._id}`);
+        if (get().selectedUser?._id !== targetUserId) return;
+
         const { lastSeen } = res.data;
         const statusText = lastSeen
           ? formatDistanceToNow(new Date(lastSeen), { addSuffix: true })
