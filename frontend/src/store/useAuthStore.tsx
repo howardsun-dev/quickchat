@@ -13,6 +13,7 @@ interface User {
   fullName: string;
   email: string;
   profilePic: string;
+  lastSeen: string;
 }
 interface AuthState {
   authUser: User | null;

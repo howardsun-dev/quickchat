@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route.ts';
 import messageRoutes from './routes/messages.route.ts';
+import userRoutes from './routes/users.route.ts';
 import path from 'node:path';
 import { connectDB } from './lib/db.ts';
 import cookieParser from 'cookie-parser';
@@ -21,6 +22,7 @@ app.use(cookieParser()); // parses cookies
 
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/user', userRoutes);
 
 // Make ready for deployment
 if (process.env.NODE_ENV == 'production') {

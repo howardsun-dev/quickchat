@@ -2,12 +2,14 @@ import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import { handleError } from '../lib/handleError';
 import { useAuthStore } from './useAuthStore';
+import { formatDistanceToNow } from 'date-fns';
 
 export interface BaseUser {
   _id: string;
   fullName: string;
   email: string;
   profilePic: string;
+  lastSeen: Date;
 }
 
 export type User = BaseUser;
@@ -36,19 +38,21 @@ interface ChatState {
   selectedUser: User | null;
   isUsersLoading: boolean;
   isMessagesLoading: boolean;
+  lastSeenDate: null | string;
   isSoundEnabled: boolean;
 }
 
 interface ChatActions {
   toggleSound: () => void;
   setActiveTab: (tab: 'chats' | 'contacts') => void;
-  setSelectedUser: (user: User | null) => void;
+  setSelectedUser: (user: User | null) => Promise<void>;
   getAllContacts: () => Promise<void>;
   getMyChatPartners: () => Promise<void>;
   getMessagesByUserId: (userId: string) => Promise<void>;
   sendMessage: (messageData: SentMessagePayload) => Promise<void>;
   subscribeToMessages: () => void;
   unsubscribeFromMessages: () => void;
+  getUserStatus: () => string | null;
 }
 
 type ChatStoreState = ChatState & ChatActions;
@@ -61,6 +65,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  lastSeenDate: null,
   isSoundEnabled: (() => {
     const stored = localStorage.getItem('isSoundEnabled');
     return stored !== null ? JSON.parse(stored) : false;
@@ -72,7 +77,24 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   },
 
   setActiveTab: (tab) => set({ activeTab: tab }),
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: async (user: User | null) => {
+    set({ selectedUser: user, lastSeenDate: null });
+
+    if (user?._id) {
+      try {
+        const res = await axiosInstance.get(`/user/status/${user._id}`);
+        const { lastSeen } = res.data;
+        const statusText = lastSeen
+          ? formatDistanceToNow(new Date(lastSeen), { addSuffix: true })
+          : null;
+
+        set({ lastSeenDate: statusText });
+      } catch (error) {
+        handleError(error, 'Unable to get status');
+        set({ lastSeenDate: null });
+      }
+    }
+  },
 
   getAllContacts: async () => {
     set({ isUsersLoading: true });
@@ -180,5 +202,11 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket?.off('newMessage');
+  },
+
+  getUserStatus: () => {
+    const { lastSeenDate } = get();
+
+    return lastSeenDate;
   },
 }));
