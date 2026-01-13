@@ -4,7 +4,7 @@ import { protectRoute } from '../middleware/auth.middleware.ts';
 import { getUserStatus } from '../controllers/user.controller.ts';
 
 const router = express();
-// router.use(arcjetProtection, protectRoute);
+router.use(arcjetProtection, protectRoute);
 
 router.get('/status/:id', getUserStatus);
 
