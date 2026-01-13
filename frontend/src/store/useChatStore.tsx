@@ -77,6 +77,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   },
 
   setActiveTab: (tab) => set({ activeTab: tab }),
+
   setSelectedUser: async (user: User | null) => {
     set({ selectedUser: user, lastSeenDate: null });
 
@@ -88,7 +89,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
 
         const { lastSeen } = res.data;
         const statusText = lastSeen
-          ? formatDistanceToNow(new Date(lastSeen), { addSuffix: true })
+          ? `Last seen ${formatDistanceToNow(new Date(lastSeen), { addSuffix: true })}`
           : null;
 
         set({ lastSeenDate: statusText });
