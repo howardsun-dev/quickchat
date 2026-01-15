@@ -25,8 +25,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
     // ✅ Reset password fields
-    resetPasswordToken: String,
-    resetPasswordExpire: { type: Date, default: null },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpire: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true } // createdAt & updatedAt
 );
