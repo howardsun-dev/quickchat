@@ -194,7 +194,9 @@ export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { resetPasswordToken } = req.params;
     const { currentPassword, newPassword, confirmPassword } = req.body;
+    const reqUser = (req as any).user;
 
+    console.log(req.body.user);
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
@@ -220,14 +222,14 @@ export const resetPassword = async (req: Request, res: Response) => {
       await user.save();
     } else {
       // Logged in flow
-      const userId = (req as any).user.id;
+      const userId = reqUser?.id;
       const user = await User.findById(userId);
 
       if (!user) return res.status(404).json({ error: 'User not found' });
 
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch)
-        return res.status(404).json({ error: 'Incorrect password' });
+        return res.status(400).json({ error: 'Incorrect password' });
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(newPassword, salt);

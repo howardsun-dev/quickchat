@@ -1,8 +1,14 @@
 import { useState, useRef } from 'react';
-import { LogOutIcon, VolumeOffIcon, Volume2Icon } from 'lucide-react';
+import {
+  LogOutIcon,
+  VolumeOffIcon,
+  Volume2Icon,
+  LockKeyholeOpenIcon,
+} from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 import toast, { LoaderIcon } from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const mouseClickSound = new Audio('/sounds/mouse-click.mp3');
 
@@ -10,6 +16,7 @@ function ProfileHeader() {
   const { logout, authUser, updateProfile, isUploading } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -86,13 +93,27 @@ function ProfileHeader() {
           </div>
         </div>
 
-        {/* BUTTONS */}
+        {/* BUTTONS CHANGE PASSWORD */}
+        <div className='"flex gap-4 items-center'>
+          <button
+            className="text-slate-400 hover:text-slate-200 transition-colors"
+            onClick={() => navigate('/change-password')}
+            aria-label="Change Password"
+            title="Change Password"
+          >
+            <LockKeyholeOpenIcon className="size-4" />
+          </button>
+        </div>
+
+        {/* BUTTONS LOGOUT */}
         <div className="flex gap-4 items-center">
           <button
             className="text-slate-400 hover:text-slate-200 transition-colors"
             onClick={logout}
+            aria-label="Logout"
+            title="Logout"
           >
-            <LogOutIcon className="size-5" />
+            <LogOutIcon className="size-4" />
           </button>
 
           {/* SOUND TOGGLE BTN */}
@@ -106,11 +127,13 @@ function ProfileHeader() {
                 .catch((error) => console.log('Audio play failed: ', error));
               toggleSound();
             }}
+            aria-label="Toggle Sound"
+            title="Toggle Sound"
           >
             {isSoundEnabled ? (
-              <Volume2Icon className="size-5" />
+              <Volume2Icon className="size-4" />
             ) : (
-              <VolumeOffIcon className="size-5" />
+              <VolumeOffIcon className="size-4" />
             )}
           </button>
         </div>

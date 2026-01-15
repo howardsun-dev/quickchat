@@ -21,6 +21,9 @@ interface AuthState {
   isSigningUp: boolean;
   isLoggingIn: boolean;
   isUploading: boolean;
+  isChangingPassword: boolean;
+  changePasswordError: string | null;
+  changePasswordSuccess: boolean;
   socket: SocketIOClientSocket | null;
   onlineUsers: string[];
 }
@@ -30,6 +33,7 @@ interface AuthActions {
   login: (data: LoginData) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: { profilePic: string }) => Promise<void>;
+  changePassword: (data: ChangePasswordData) => Promise<void>;
   connectSocket: () => void;
   disconnectSocket: () => void;
 }
@@ -45,12 +49,22 @@ interface LoginData {
   email: string;
   password: string;
 }
+
+interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export const useAuthStore = create<StoreState>((set, get) => ({
   authUser: null,
   isCheckingAuth: true,
   isSigningUp: false,
   isLoggingIn: false,
   isUploading: false,
+  isChangingPassword: false,
+  changePasswordError: '',
+  changePasswordSuccess: false,
   socket: null,
   onlineUsers: [],
 
@@ -156,6 +170,28 @@ export const useAuthStore = create<StoreState>((set, get) => ({
       socket.off('getOnlineUsers');
       socket.off('connect');
       socket.disconnect();
+    }
+  },
+
+  changePassword: async (data: ChangePasswordData) => {
+    set({
+      isChangingPassword: true,
+      changePasswordError: '',
+      changePasswordSuccess: false,
+    });
+
+    try {
+      await axiosInstance.post('/auth/change-password', data);
+      set({ changePasswordSuccess: true, changePasswordError: '' });
+      toast.success('Password changed successfully');
+    } catch (error: unknown) {
+      const errMessage = handleError(error, 'Password change failed');
+      set({
+        changePasswordError: errMessage,
+        changePasswordSuccess: false,
+      });
+    } finally {
+      set({ isChangingPassword: false });
     }
   },
 }));

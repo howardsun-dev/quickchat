@@ -26,6 +26,7 @@ router.post('/logout', logout);
 
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:resetPasswordToken', resetPassword);
+router.post('/change-password', protectRoute, resetPassword);
 
 router.put('/update-profile', protectRoute, updateProfile);
 
