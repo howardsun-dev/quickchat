@@ -110,7 +110,7 @@ export const useAuthStore = create<StoreState>((set, get) => ({
     } catch (error: unknown) {
       handleError(error, 'Login failed');
     } finally {
-      set({ isLoggingIn: false });
+      set({ isLoggingIn: false, changePasswordSuccess: false });
     }
   },
 
