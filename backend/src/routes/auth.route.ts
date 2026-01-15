@@ -12,7 +12,7 @@ import { arcjetProtection } from '../middleware/arcjet.middleware.ts';
 
 const router = express.Router();
 
-router.use(arcjetProtection);
+// router.use(arcjetProtection);
 
 // router.get('/testlogin', arcjetProtection, (req, res) => {
 //   res.json({ message: 'Arcjet Test Route' });
@@ -22,7 +22,7 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.post('/logout', logout);
 
-// TODO: Create Forget Password and Change password
+// TODO: Create Forget Password
 
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:resetPasswordToken', resetPassword);

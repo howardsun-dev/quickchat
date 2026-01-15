@@ -38,7 +38,10 @@ function App() {
           path="/signup"
           element={!authUser ? <SignUpPage /> : <Navigate to={'/'} />}
         />
-        <Route path="/change-password" element={<ChangePasswordPage />} />
+        <Route
+          path="/change-password"
+          element={authUser ? <ChangePasswordPage /> : <Navigate to="/login" />}
+        />
       </Routes>
       <Toaster />
     </div>

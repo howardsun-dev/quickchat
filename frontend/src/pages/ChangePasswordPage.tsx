@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BorderAnimatedContainer from '../components/BorderAnimatedContainer';
 import { LockIcon, LoaderIcon, CheckCircleIcon } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
@@ -35,12 +35,15 @@ function ChangePasswordPage() {
   };
 
   // Redirect on success
-  if (changePasswordSuccess) {
-    setTimeout(() => {
-      logout();
-      navigate('/login'); // or wherever you want to redirect
-    }, 1500);
-  }
+  useEffect(() => {
+    if (changePasswordSuccess) {
+      const timer = setTimeout(() => {
+        logout();
+        navigate('/login');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [changePasswordSuccess, logout, navigate]);
 
   return (
     <div className="w-full flex items-center justify-center p-4 bg-slate-900 min-h-screen">

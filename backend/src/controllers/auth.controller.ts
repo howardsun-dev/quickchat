@@ -9,7 +9,6 @@ import {
 import { ENV } from '../lib/env.ts';
 import cloudinary from '../lib/cloudinary.ts';
 import * as crypto from 'node:crypto';
-import { json } from 'node:stream/consumers';
 
 interface SignupBody {
   fullName: string;
@@ -53,7 +52,7 @@ export const signup = async (
       return;
     }
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
@@ -166,11 +165,15 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     // Generate 1 hour token for password reset
     const resetToken = crypto.randomBytes(32).toString('hex');
-    user.resetPasswordToken = resetToken;
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+    user.resetPasswordToken = hashedToken;
     user.resetPasswordExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await user.save();
 
-    const resetUrl = `${ENV.CLIENT_URL}/api/auth/forgot-password/${resetToken}`;
+    const resetUrl = `${ENV.CLIENT_URL}/reset-password/${resetToken}`;
 
     try {
       await sendForgotPasswordEmail(user.fullName, user.email, resetUrl);
@@ -187,6 +190,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -196,7 +200,6 @@ export const resetPassword = async (req: Request, res: Response) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const reqUser = (req as any).user;
 
-    console.log(req.body.user);
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
@@ -206,8 +209,13 @@ export const resetPassword = async (req: Request, res: Response) => {
     }
 
     if (resetPasswordToken) {
+      const hashProvidedToken = crypto
+        .createHash('sha256')
+        .update(resetPasswordToken)
+        .digest('hex');
+
       const user = await User.findOne({
-        resetPasswordToken,
+        resetPasswordToken: hashProvidedToken,
         resetPasswordExpire: { $gt: new Date() },
       });
 
@@ -215,7 +223,7 @@ export const resetPassword = async (req: Request, res: Response) => {
       user.resetPasswordToken = null;
       user.resetPasswordExpire = null;
 
-      const salt = await bcrypt.genSalt(10);
+      const salt = await bcrypt.genSalt(12);
       const hashedPassword = await bcrypt.hash(newPassword, salt);
       user.password = hashedPassword;
 
@@ -231,7 +239,7 @@ export const resetPassword = async (req: Request, res: Response) => {
       if (!isMatch)
         return res.status(400).json({ error: 'Incorrect password' });
 
-      const salt = await bcrypt.genSalt(10);
+      const salt = await bcrypt.genSalt(12);
       const hashedPassword = await bcrypt.hash(newPassword, salt);
       user.password = hashedPassword;
 
