@@ -179,6 +179,7 @@ export const useAuthStore = create<StoreState>((set, get) => ({
       changePasswordError: '',
       changePasswordSuccess: false,
     });
+    console.log(data);
 
     try {
       await axiosInstance.post('/auth/change-password', data);

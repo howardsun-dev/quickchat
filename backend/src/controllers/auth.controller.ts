@@ -200,6 +200,8 @@ export const resetPassword = async (req: Request, res: Response) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const reqUser = (req as any).user;
 
+    // console.log(req);
+
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
