@@ -4,6 +4,8 @@ import {
   logout,
   signup,
   updateProfile,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/auth.controller.ts';
 import { protectRoute } from '../middleware/auth.middleware.ts';
 import { arcjetProtection } from '../middleware/arcjet.middleware.ts';
@@ -19,6 +21,12 @@ router.use(arcjetProtection);
 router.post('/signup', signup);
 router.post('/login', login);
 router.post('/logout', logout);
+
+// TODO: Create Forget Password
+
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password/:resetPasswordToken', resetPassword);
+router.post('/change-password', protectRoute, resetPassword);
 
 router.put('/update-profile', protectRoute, updateProfile);
 

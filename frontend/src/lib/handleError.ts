@@ -15,4 +15,6 @@ export const handleError = (
     return;
   }
   toast.error(fallback);
+
+  return fallback;
 };
