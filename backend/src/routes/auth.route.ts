@@ -5,13 +5,14 @@ import {
   signup,
   updateProfile,
   forgotPassword,
+  resetPassword,
 } from '../controllers/auth.controller.ts';
 import { protectRoute } from '../middleware/auth.middleware.ts';
 import { arcjetProtection } from '../middleware/arcjet.middleware.ts';
 
 const router = express.Router();
 
-router.use(arcjetProtection);
+// router.use(arcjetProtection);
 
 // router.get('/testlogin', arcjetProtection, (req, res) => {
 //   res.json({ message: 'Arcjet Test Route' });
@@ -24,7 +25,7 @@ router.post('/logout', logout);
 // TODO: Create Forget Password and Change password
 
 router.post('/forgot-password', forgotPassword);
-router.post('/reset-password/:restPasswordToken');
+router.post('/reset-password/:resetPasswordToken', resetPassword);
 
 router.put('/update-profile', protectRoute, updateProfile);
 

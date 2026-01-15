@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import User, { type IUser } from '../models/User.ts';
+import User from '../models/User.ts';
 import type { Request, Response } from 'express';
 import { generateToken } from '../lib/utils.ts';
 import {
@@ -199,43 +199,42 @@ export const resetPassword = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Passwords do not match' });
     }
 
-    if (newPassword.length < 8) {
-      return res.status(400).json({ error: 'Password must be 8+ characters' });
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be 6+ characters' });
     }
 
-    let user;
-
     if (resetPasswordToken) {
-      user = await User.findOne({
+      const user = await User.findOne({
         resetPasswordToken,
         resetPasswordExpire: { $gt: new Date() },
       });
 
-      if (!user) {
-        return res.status(400).json({ error: 'Invalid or expired token' });
-      }
-    } else {
-      const userId = (req as any).user.id;
-      user = await User.findById(userId);
-
-      if (!user) res.status(404).json({ message: 'User not found' });
-
-      //verify current password
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ error: 'Current password incorrect' });
-      }
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-
-    if (resetPasswordToken) {
+      if (!user) return res.status(400).json({ error: 'Invalid token' });
       user.resetPasswordToken = null;
       user.resetPasswordExpire = null;
-    }
 
-    await user.save();
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      user.password = hashedPassword;
+
+      await user.save();
+    } else {
+      // Logged in flow
+      const userId = (req as any).user.id;
+      const user = await User.findById(userId);
+
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch)
+        return res.status(404).json({ error: 'Incorrect password' });
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      user.password = hashedPassword;
+
+      await user.save();
+    }
 
     res.json({ message: 'Password updated successfully' });
   } catch (error) {
