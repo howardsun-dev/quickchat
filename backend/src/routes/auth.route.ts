@@ -20,6 +20,11 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.post('/logout', logout);
 
+// TODO: Create Forget Password and Change password
+
+router.post('/forget-password');
+router.post('/change-password');
+
 router.put('/update-profile', protectRoute, updateProfile);
 
 router.get('/check', protectRoute, (req, res) => {

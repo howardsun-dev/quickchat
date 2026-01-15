@@ -2,9 +2,13 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.ts';
 import type { Request, Response } from 'express';
 import { generateToken } from '../lib/utils.ts';
-import { sendWelcomeEmail } from '../emails/emailHandlers.ts';
+import {
+  sendForgotPasswordEmail,
+  sendWelcomeEmail,
+} from '../emails/emailHandlers.ts';
 import { ENV } from '../lib/env.ts';
 import cloudinary from '../lib/cloudinary.ts';
+import * as crypto from 'node:crypto';
 
 interface SignupBody {
   fullName: string;
@@ -145,5 +149,42 @@ export const updateProfile = async (
   } catch (error) {
     console.log('Error in update profile:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(200).json({
+        message: 'If account exists, reset link has been sent',
+      });
+    }
+
+    // Generate 1 hour token for password reset
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    const resetUrl = `${ENV.CLIENT_URL}/api/auth/forgot-password/${resetToken}`;
+
+    try {
+      await sendForgotPasswordEmail(user.email, user.fullName, resetUrl);
+    } catch (error) {
+      console.error(
+        'Failed to send forgot password email: ',
+        error,
+        user.email
+      );
+    }
+
+    res.status(200).json({
+      message: 'If account exists, reset link has been sent to your email',
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
   }
 };

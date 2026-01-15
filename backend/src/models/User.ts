@@ -24,6 +24,9 @@ const userSchema = new mongoose.Schema(
     lastSeen: {
       type: Date,
     },
+    // ✅ Reset password fields
+    resetPasswordToken: String,
+    resetPasswordExpire: { type: Date, default: null },
   },
   { timestamps: true } // createdAt & updatedAt
 );

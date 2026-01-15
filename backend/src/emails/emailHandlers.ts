@@ -1,5 +1,8 @@
 import { resendClient, sender } from '../lib/resend.ts';
-import { createWelcomeEmailTemplate } from './emailTemplate.ts';
+import {
+  createWelcomeEmailTemplate,
+  resetPasswordEmailTemplate,
+} from './emailTemplate.ts';
 
 export const sendWelcomeEmail = async (
   email: string,
@@ -19,4 +22,17 @@ export const sendWelcomeEmail = async (
   }
 
   console.log('Welcome email sent successfully', data);
+};
+
+export const sendForgotPasswordEmail = async (
+  name: string,
+  email: string,
+  resetUrl: string | undefined
+) => {
+  const { data, error } = await resendClient.emails.send({
+    from: `${sender.name} <${sender.email}>`,
+    to: email,
+    subject: 'Quickchat - Forgot your Password?',
+    html: resetPasswordEmailTemplate(name, resetUrl),
+  });
 };
