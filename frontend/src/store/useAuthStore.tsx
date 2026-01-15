@@ -191,7 +191,7 @@ export const useAuthStore = create<StoreState>((set, get) => ({
         changePasswordSuccess: false,
       });
     } finally {
-      set({ isChangingPassword: false, changePasswordSuccess: false });
+      set({ isChangingPassword: false });
     }
   },
 }));

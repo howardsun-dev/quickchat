@@ -94,7 +94,7 @@ function ProfileHeader() {
         </div>
 
         {/* BUTTONS CHANGE PASSWORD */}
-        <div className='"flex gap-4 items-center'>
+        <div className="flex gap-4 items-center">
           <button
             className="text-slate-400 hover:text-slate-200 transition-colors"
             onClick={() => navigate('/change-password')}

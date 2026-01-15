@@ -233,6 +233,10 @@ export const resetPassword = async (req: Request, res: Response) => {
       const userId = reqUser?.id;
       const user = await User.findById(userId);
 
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required' });
+      }
+
       if (!user) return res.status(404).json({ error: 'User not found' });
 
       const isMatch = await bcrypt.compare(currentPassword, user.password);

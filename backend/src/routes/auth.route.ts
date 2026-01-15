@@ -12,7 +12,7 @@ import { arcjetProtection } from '../middleware/arcjet.middleware.ts';
 
 const router = express.Router();
 
-// router.use(arcjetProtection);
+router.use(arcjetProtection);
 
 // router.get('/testlogin', arcjetProtection, (req, res) => {
 //   res.json({ message: 'Arcjet Test Route' });
