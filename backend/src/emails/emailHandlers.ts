@@ -27,7 +27,7 @@ export const sendWelcomeEmail = async (
 export const sendForgotPasswordEmail = async (
   name: string,
   email: string,
-  resetUrl: string | undefined
+  resetUrl: string
 ) => {
   const { data, error } = await resendClient.emails.send({
     from: `${sender.name} <${sender.email}>`,
