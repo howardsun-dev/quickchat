@@ -91,7 +91,8 @@ function LoginPage() {
                   <Link to="/signup" className="auth-link">
                     Don't have an account? Sign up
                   </Link>
-                  <p className="p-2"></p>
+                </div>
+                <div className="mt-6 text-center">
                   <Link to="/forgot-password" className="auth-link">
                     Forgot your password? Click here to reset
                   </Link>

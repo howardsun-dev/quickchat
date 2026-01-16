@@ -24,6 +24,12 @@ interface AuthState {
   isChangingPassword: boolean;
   changePasswordError: string | null;
   changePasswordSuccess: boolean;
+  isResettingPassword: boolean;
+  resetPasswordError: string;
+  resetPasswordSuccess: boolean;
+  isSendingResetEmail: boolean;
+  resetEmailError: string | null;
+  resetEmailSuccess: boolean;
   socket: SocketIOClientSocket | null;
   onlineUsers: string[];
 }
@@ -34,8 +40,10 @@ interface AuthActions {
   logout: () => Promise<void>;
   updateProfile: (data: { profilePic: string }) => Promise<void>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
+  resetPassword: (data: resetPasswordData) => Promise<void>;
   connectSocket: () => void;
   disconnectSocket: () => void;
+  forgotPassword: (email: forgotPasswordData) => Promise<void>;
 }
 
 type StoreState = AuthState & AuthActions;
@@ -56,6 +64,15 @@ interface ChangePasswordData {
   confirmPassword: string;
 }
 
+interface forgotPasswordData {
+  email: string;
+}
+interface resetPasswordData {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export const useAuthStore = create<StoreState>((set, get) => ({
   authUser: null,
   isCheckingAuth: true,
@@ -65,6 +82,12 @@ export const useAuthStore = create<StoreState>((set, get) => ({
   isChangingPassword: false,
   changePasswordError: '',
   changePasswordSuccess: false,
+  isResettingPassword: false,
+  resetPasswordError: '',
+  resetPasswordSuccess: false,
+  isSendingResetEmail: false,
+  resetEmailError: '',
+  resetEmailSuccess: false,
   socket: null,
   onlineUsers: [],
 
@@ -193,6 +216,55 @@ export const useAuthStore = create<StoreState>((set, get) => ({
       });
     } finally {
       set({ isChangingPassword: false });
+    }
+  },
+
+  resetPassword: async ({
+    token,
+    newPassword,
+    confirmPassword,
+  }: resetPasswordData) => {
+    set({
+      isResettingPassword: true,
+      resetPasswordError: '',
+      resetPasswordSuccess: false,
+    });
+
+    try {
+      await axiosInstance.post(`/auth/reset-password/${token}`, {
+        newPassword,
+        confirmPassword,
+      });
+      set({ resetPasswordSuccess: true });
+      toast.success('Password reset successfully');
+    } catch (error: unknown) {
+      handleError(error, 'Password reset failed');
+      const errMessage =
+        error instanceof Error ? error.message : 'Password reset failed';
+      set({ resetPasswordError: errMessage, resetPasswordSuccess: false });
+    } finally {
+      set({ isResettingPassword: false });
+    }
+  },
+
+  forgotPassword: async (data: forgotPasswordData) => {
+    set({
+      isSendingResetEmail: true,
+      resetEmailError: '',
+      resetEmailSuccess: false,
+    });
+
+    try {
+      await axiosInstance.post('/auth/forgot-password', data);
+      set({ resetEmailSuccess: true });
+      toast.success('Reset link sent to your email!');
+    } catch (error: unknown) {
+      handleError(error, 'Failed to send reset email');
+      const errMessage =
+        error instanceof Error ? error.message : 'Failed to send reset email';
+      set({ resetEmailError: errMessage, resetEmailSuccess: false });
+    } finally {
+      set({ isSendingResetEmail: false });
     }
   },
 }));
