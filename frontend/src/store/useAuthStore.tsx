@@ -238,9 +238,7 @@ export const useAuthStore = create<StoreState>((set, get) => ({
       set({ resetPasswordSuccess: true });
       toast.success('Password reset successfully');
     } catch (error: unknown) {
-      handleError(error, 'Password reset failed');
-      const errMessage =
-        error instanceof Error ? error.message : 'Password reset failed';
+      const errMessage = handleError(error, 'Password reset failed');
       set({ resetPasswordError: errMessage, resetPasswordSuccess: false });
     } finally {
       set({ isResettingPassword: false });
@@ -259,9 +257,7 @@ export const useAuthStore = create<StoreState>((set, get) => ({
       set({ resetEmailSuccess: true });
       toast.success('Reset link sent to your email!');
     } catch (error: unknown) {
-      handleError(error, 'Failed to send reset email');
-      const errMessage =
-        error instanceof Error ? error.message : 'Failed to send reset email';
+      const errMessage = handleError(error, 'Failed to send reset email');
       set({ resetEmailError: errMessage, resetEmailSuccess: false });
     } finally {
       set({ isSendingResetEmail: false });
