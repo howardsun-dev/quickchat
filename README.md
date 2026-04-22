@@ -2,7 +2,7 @@
 
 A full-stack real-time chat application built with React, Node.js, Socket.IO, and MongoDB. Features JWT authentication, optimistic UI updates, online/offline presence detection, and secure media uploads.
 
-<!-- Add live demo link if deployed: [Live Demo](https://your-url.com) -->
+[QuickChat](https://quickchat-v72jh.sevalla.app/)
 
 ---
 
