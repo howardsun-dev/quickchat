@@ -1,146 +1,115 @@
-# Quickchat
+# QuickChat
 
-**Proof of concept full‑stack chat application** — built with a separate frontend and backend.
+A full-stack real-time chat application built with React, Node.js, Socket.IO, and MongoDB. Features JWT authentication, optimistic UI updates, online/offline presence detection, and secure media uploads.
 
-This repository contains the source code for **Quickchat**, a demo chat project with real‑time messaging capabilities.
-
----
-
-## 🧠 Overview
-
-Quickchat is a prototype chat app that demonstrates real‑time messaging between users. The project uses a modern frontend and backend stack to showcase:
-
-- 🚀 Real‑time communication (WebSockets / similar)
-- ⚙️ Separate **frontend** and **backend** codebases
-- 📦 Easy local development with clear folder structure
+<!-- Add live demo link if deployed: [Live Demo](https://your-url.com) -->
 
 ---
 
-## 📁 Repository Structure
-```text
+## Features
+
+- **Real-time messaging** via Socket.IO WebSocket connections
+- **JWT authentication** with secure session handling
+- **Optimistic UI updates** for a responsive, low-latency feel
+- **Online/offline presence detection** across connected users
+- **Media uploads** via Cloudinary integration
+- **Rate limiting & bot protection** via Arcjet
+- **Responsive UI** built with Tailwind CSS and DaisyUI
+
+---
+
+## Tech Stack
+
+**Frontend**
+- React
+- Zustand (state management)
+- Socket.IO client
+- Tailwind CSS + DaisyUI
+
+**Backend**
+- Node.js + Express
+- Socket.IO
+- MongoDB + Mongoose
+- Cloudinary (media storage)
+- Arcjet (rate limiting & request protection)
+- JSON Web Tokens (JWT)
+
+---
+
+## Project Structure
+
+```
 /
-├── backend/ # Server‑side code
-├── frontend/ # Client‑side UI
-├── .vscode/ # Workspace configs
-├── package.json # Monorepo scripts & tooling (if applicable)
-├── LICENSE # MIT License
-└── README.md # Project overview (this file)
+├── backend/        # Express server, Socket.IO, REST API
+├── frontend/       # React client
+├── package.json    # Root scripts (build, start, test)
+└── README.md
 ```
 
 ---
 
-## 🚀 Features
-
-✨ Basic real‑time discussion interface  
-🔐 Simple authentication flow *(if implemented)*  
-💬 Message persistence *(depending on backend)*  
-📦 API server + UI decoupled architecture
-
-> _This is a proof‑of‑concept; features may be experimental._
-
----
-
-## 🛠 Tech Stack
-
-**Frontend**
-- React
-- Zustand
-- Tailwind CSS
-- Daisy UI
-- Socket.IO
-
-**Backend**
-- Node.js / TypeScript or JavaScript
-- Express / Fastify or equivalent
-- Socket.IO
-- Arcjet
-- Cloudinary
-- MongoDB
-
-*(Replace the above with actual choices used in your code.)*
-
----
-
-## 💻 Local Setup
+## Getting Started
 
 ### Prerequisites
 
-Make sure you have the following installed:
+- Node.js v20+
+- npm
+- MongoDB instance (local or Atlas)
+- Cloudinary account
+- Arcjet account
 
-- Node.js (v16+)
-- npm or yarn
+### Environment Variables
 
----
-Define your .ENV for ports and variables defined within ENV.ts
+Create a `.env` file in the `backend/` directory. Reference `ENV.ts` for the full list of required variables. At minimum you will need:
 
-### Backend Setup
+```
+MONGODB_URI=
+JWT_SECRET=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+ARCJET_KEY=
+PORT=
+```
 
-1. Navigate to the backend folder:
-   ```bash
-   cd backend
+### Install & Run
 
-   npm install
-   npm run dev
-   
-   ```
+```bash
+# Install all dependencies
+npm run build
 
-2.  Navigate to frontend folder:
-   ```bash
+# Start the backend server
+npm start
+```
+
+Or run frontend and backend separately during development:
+
+```bash
+# Backend
+cd backend
+npm install
+npm run dev
+
+# Frontend (in a separate terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
+The backend must be running before starting the frontend.
 
 ---
 
-## 🧪 Development Notes
+## Testing
 
-The backend should be running before starting the frontend.
+```bash
+npm test
+```
 
-Real‑time features depend on WebSocket connections — ensure the server supports them.
-
-This POC may not include production‑level error handling or security.
-
-
----
-
-## 📦 Deployment
-
-Deployment steps depend on your hosting setup:
-
-Backend
-
-Deploy to Heroku, Render, Vercel (Serverless), or similar.
-
-Frontend
-
-Deploy to Netlify, Vercel, GitHub Pages, or static hosting.
-
-You may want to configure environment variables for production before deploying.
-
+Tests are run with Vitest.
 
 ---
 
-## 👥 Contributing
+## License
 
-Contributions are welcome! Please open issues or pull requests with improvements.
-
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-See LICENSE
- for details.
-
-
----
-
-## ❓ Questions
-
-If you have questions or need help, feel free to open an issue on GitHub.
-
-
-   
+MIT — see [LICENSE](./LICENSE) for details.
