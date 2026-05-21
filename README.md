@@ -24,9 +24,7 @@ A full-stack real-time chat application with JWT authentication, optimistic UI u
 
 ## Architecture
 
-![Architecture Diagram](https://excalidraw.com/#json=JwKDclbwls3OlS8_aU59l,4iiiypHTpFIY25fQ3lx1sw)
-
-*Click the link above to view the interactive architecture diagram on Excalidraw.*
+▶ **[View Interactive Architecture Diagram on Excalidraw](https://excalidraw.com/#json=JwKDclbwls3OlS8_aU59l,4iiiypHTpFIY25fQ3lx1sw)**
 
 ### Overview
 
