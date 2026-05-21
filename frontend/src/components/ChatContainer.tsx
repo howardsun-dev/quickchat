@@ -15,8 +15,6 @@ function ChatContainer() {
     typingUsers,
     subscribeToMessages,
     unsubscribeFromMessages,
-    subscribeToTyping,
-    unsubscribeFromTyping,
   } = useChatStore();
   const { authUser, onlineUsers } = useAuthStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
