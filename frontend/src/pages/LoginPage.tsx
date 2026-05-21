@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import BorderAnimatedContainer from '../components/BorderAnimatedContainer';
-import {
-  MessageCircleIcon,
-  LockIcon,
-  MailIcon,
-  LoaderIcon,
-} from 'lucide-react';
+import { MessageCircleIcon, LockIcon, MailIcon, LoaderIcon } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Link } from 'react-router';
 
@@ -16,6 +11,14 @@ function LoginPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     login(formData);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, email: e.target.value });
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, password: e.target.value });
   };
 
   return (
@@ -39,36 +42,40 @@ function LoginPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* EMAIL INPUT */}
                   <div>
-                    <label className="auth-input-label">Email</label>
+                    <label htmlFor="login-email" className="auth-input-label">
+                      Email
+                    </label>
                     <div className="relative">
                       <MailIcon className="auth-input-icon" />
 
                       <input
+                        id="login-email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
+                        onChange={handleEmailChange}
                         className="input"
                         placeholder="johndoe@gmail.com"
+                        required
                       />
                     </div>
                   </div>
 
                   {/* PASSWORD INPUT */}
                   <div>
-                    <label className="auth-input-label">Password</label>
+                    <label htmlFor="login-password" className="auth-input-label">
+                      Password
+                    </label>
                     <div className="relative">
                       <LockIcon className="auth-input-icon" />
 
                       <input
+                        id="login-password"
                         type="password"
                         value={formData.password}
-                        onChange={(e) =>
-                          setFormData({ ...formData, password: e.target.value })
-                        }
+                        onChange={handlePasswordChange}
                         className="input"
                         placeholder="Enter your password"
+                        required
                       />
                     </div>
                   </div>
@@ -112,7 +119,6 @@ function LoginPage() {
                   <h3 className="text-xl font-medium text-cyan-400">
                     Connect anytime, anywhere
                   </h3>
-
                   <div className="mt-4 flex justify-center gap-4">
                     <span className="auth-badge">Free</span>
                     <span className="auth-badge">Easy Setup</span>

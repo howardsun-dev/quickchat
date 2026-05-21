@@ -23,6 +23,18 @@ function SignUpPage() {
     signup(formData);
   };
 
+  const handleFullNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, fullName: e.target.value });
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, email: e.target.value });
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, password: e.target.value });
+  };
+
   return (
     <div className="w-full flex items-center justify-center p-4 bg-slate-900">
       <div className="relative w-full max-w-6xl md:h-[800px] h-[650px]">
@@ -44,54 +56,60 @@ function SignUpPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* FULL NAME */}
                   <div>
-                    <label className="auth-input-label">Full Name</label>
+                    <label htmlFor="signup-fullname" className="auth-input-label">
+                      Full Name
+                    </label>
                     <div className="relative">
                       <UserIcon className="auth-input-icon" />
 
                       <input
+                        id="signup-fullname"
                         type="text"
                         value={formData.fullName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, fullName: e.target.value })
-                        }
+                        onChange={handleFullNameChange}
                         className="input"
                         placeholder="John Doe"
+                        required
                       />
                     </div>
                   </div>
 
                   {/* EMAIL INPUT */}
                   <div>
-                    <label className="auth-input-label">Email</label>
+                    <label htmlFor="signup-email" className="auth-input-label">
+                      Email
+                    </label>
                     <div className="relative">
                       <MailIcon className="auth-input-icon" />
 
                       <input
+                        id="signup-email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
+                        onChange={handleEmailChange}
                         className="input"
                         placeholder="johndoe@gmail.com"
+                        required
                       />
                     </div>
                   </div>
 
                   {/* PASSWORD INPUT */}
                   <div>
-                    <label className="auth-input-label">Password</label>
+                    <label htmlFor="signup-password" className="auth-input-label">
+                      Password
+                    </label>
                     <div className="relative">
                       <LockIcon className="auth-input-icon" />
 
                       <input
+                        id="signup-password"
                         type="password"
                         value={formData.password}
-                        onChange={(e) =>
-                          setFormData({ ...formData, password: e.target.value })
-                        }
+                        onChange={handlePasswordChange}
                         className="input"
                         placeholder="Enter your password"
+                        required
                       />
                     </div>
                   </div>
@@ -130,7 +148,6 @@ function SignUpPage() {
                   <h3 className="text-xl font-medium text-cyan-400">
                     Start Your Journey Today
                   </h3>
-
                   <div className="mt-4 flex justify-center gap-4">
                     <span className="auth-badge">Free</span>
                     <span className="auth-badge">Easy Setup</span>
@@ -145,4 +162,5 @@ function SignUpPage() {
     </div>
   );
 }
+
 export default SignUpPage;
