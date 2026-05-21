@@ -93,7 +93,7 @@ export const sentMessage = async (req: Request, res: Response) => {
 
 export const getChatPartners = async (req: Request, res: Response) => {
   try {
-    const loggedInUserId = (req.user as { _id: string })._id;
+    const loggedInUserId = (req.user as unknown as { _id: string })._id;
 
     // find all the messages where the logged-in user is either sender or receiver
     const messages = await Message.find({

@@ -1,3 +1,10 @@
+/**
+ * Renders a vertical list of three skeleton placeholders used while user items are loading.
+ *
+ * Each placeholder contains a circular avatar stub and two rectangular bars representing primary and secondary text.
+ *
+ * @returns The component's JSX element containing three user-loading skeleton items.
+ */
 function UsersLoadingSkeleton() {
   return (
     <div className="space-y-2">
