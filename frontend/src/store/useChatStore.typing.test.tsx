@@ -39,7 +39,7 @@ const initialState = {
   isMessagesLoading: false,
   lastSeenDate: null,
   isSoundEnabled: false,
-  typingUserId: null,
+  typingUsers: {},
 };
 
 const resetStore = async () => {
@@ -82,13 +82,13 @@ describe('useChatStore typing', () => {
 
     useChatStore.getState().subscribeToTyping();
     handlers.get('typing:start')?.({ senderId: 'other-user' });
-    expect(useChatStore.getState().typingUserId).toBeNull();
+    expect(useChatStore.getState().typingUsers['other-user']).toBeUndefined();
 
     handlers.get('typing:start')?.({ senderId: 'them' });
-    expect(useChatStore.getState().typingUserId).toBe('them');
+    expect(useChatStore.getState().typingUsers['them']).toBe(true);
 
     handlers.get('typing:stop')?.({ senderId: 'them' });
-    expect(useChatStore.getState().typingUserId).toBeNull();
+    expect(useChatStore.getState().typingUsers['them']).toBe(false);
     expect(authState.socket.off).toHaveBeenCalledWith('typing:start');
     expect(authState.socket.off).toHaveBeenCalledWith('typing:stop');
   });
