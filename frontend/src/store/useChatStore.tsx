@@ -42,6 +42,14 @@ interface ChatState {
   isSoundEnabled: boolean;
 }
 
+const getStoredSoundPreference = () => {
+  try {
+    return localStorage.getItem('isSoundEnabled') === 'true';
+  } catch {
+    return false;
+  }
+};
+
 interface ChatActions {
   toggleSound: () => void;
   setActiveTab: (tab: 'chats' | 'contacts') => void;
@@ -66,10 +74,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
   lastSeenDate: null,
-  isSoundEnabled: (() => {
-    const stored = localStorage.getItem('isSoundEnabled');
-    return stored !== null ? JSON.parse(stored) : false;
-  })(),
+  isSoundEnabled: getStoredSoundPreference(),
 
   toggleSound: () => {
     localStorage.setItem('isSoundEnabled', String(!get().isSoundEnabled));
@@ -129,6 +134,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
+      if (get().selectedUser?._id !== userId) return;
       set({ messages: res.data });
     } catch (error) {
       handleError(error, 'Failed to fetch messages');
@@ -168,10 +174,17 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
         `/messages/send/${selectedUser._id}`,
         messageData
       );
-      set({ messages: messages.concat(res.data) });
+      set({
+        messages: [
+          ...get().messages.filter((message) => message._id !== tempId),
+          res.data,
+        ],
+      });
     } catch (error: unknown) {
       // Remove optimistic message on failure
-      set({ messages: messages });
+      set({
+        messages: get().messages.filter((message) => message._id !== tempId),
+      });
       handleError(error, 'Failed to send messages');
     }
   },
@@ -183,12 +196,14 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
 
     const socket = useAuthStore.getState().socket;
 
+    socket?.off('newMessage');
     socket?.on('newMessage', (newMessage) => {
       const isMessageSentFromSelectedUser =
-        newMessage.senderId === selectedUser._id;
+        newMessage.senderId === get().selectedUser?._id;
       if (!isMessageSentFromSelectedUser) return;
 
       const currentMessages = get().messages;
+      if (currentMessages.some((message) => message._id === newMessage._id)) return;
       set({ messages: [...currentMessages, newMessage] });
 
       if (isSoundEnabled) {

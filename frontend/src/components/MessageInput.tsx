@@ -93,6 +93,7 @@ function MessageInput() {
 
         <button
           type="button"
+          aria-label="Attach image"
           onClick={() => fileInputRef.current?.click()}
           className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 transition-colors ${
             imagePreview ? 'text-cyan-500' : ''
@@ -102,6 +103,7 @@ function MessageInput() {
         </button>
         <button
           type="submit"
+          aria-label="Send message"
           disabled={!text.trim() && !imagePreview}
           className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg px-4 py-2 font-medium hover:from-cyan-600 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >

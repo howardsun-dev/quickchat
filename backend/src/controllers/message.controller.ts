@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import User from '../models/User.ts';
 import cloudinary from '../lib/cloudinary.ts';
-import { getReceiverSocketId, io } from '../lib/socket.ts';
+import { getReceiverSocketIds, io } from '../lib/socket.ts';
 
 export const getAlLContacts = async (req: Request, res: Response) => {
   try {
@@ -15,6 +15,7 @@ export const getAlLContacts = async (req: Request, res: Response) => {
     res.status(200).json(filteredUsers);
   } catch (error) {
     console.log('Error fetching getAlLContacts:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -22,6 +23,9 @@ export const getMessagesByUserId = async (req: Request, res: Response) => {
   try {
     const myId = req.user._id;
     const { id: userToChatId } = req.params;
+    if (typeof userToChatId !== 'string' || !Types.ObjectId.isValid(userToChatId)) {
+      return res.status(400).json({ error: 'Invalid user id' });
+    }
 
     const messages = await Message.find({
       $or: [
@@ -42,11 +46,16 @@ export const sentMessage = async (req: Request, res: Response) => {
     const { text, image } = req.body;
     const { id: receiverId } = req.params;
     const senderId = (req.user as { _id: Types.ObjectId })._id;
+    const normalizedText = typeof text === 'string' ? text.trim() : '';
 
-    if (!text && !image) {
+    if (!normalizedText && !image) {
       return res
         .status(400)
         .json({ error: 'Message must contain text or an image' });
+    }
+
+    if (typeof receiverId !== 'string' || !Types.ObjectId.isValid(receiverId)) {
+      return res.status(400).json({ error: 'Invalid receiver id' });
     }
 
     if (senderId.equals(receiverId)) {
@@ -68,16 +77,15 @@ export const sentMessage = async (req: Request, res: Response) => {
     const newMessage = new Message({
       senderId,
       receiverId,
-      text,
+      text: normalizedText,
       image: imageUrl,
     });
 
     await newMessage.save();
 
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('newMessage', newMessage);
-    }
+    getReceiverSocketIds(receiverId).forEach((socketId) => {
+      io.to(socketId).emit('newMessage', newMessage);
+    });
 
     res.status(201).json(newMessage);
   } catch (error) {
@@ -93,7 +101,7 @@ export const sentMessage = async (req: Request, res: Response) => {
 
 export const getChatPartners = async (req: Request, res: Response) => {
   try {
-    const loggedInUserId = (req.user as { _id: string })._id;
+    const loggedInUserId = req.user._id;
 
     // find all the messages where the logged-in user is either sender or receiver
     const messages = await Message.find({

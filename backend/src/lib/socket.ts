@@ -25,14 +25,14 @@ const io = new Server(server, {
 io.use(socketAuthMiddleware);
 
 // Using this function to check if the user is online or not
-export function getReceiverSocketId(
-  userId: string | undefined
-): string | undefined {
-  if (!userId) return undefined;
-  return userSocketMap[userId];
+export function getReceiverSocketIds(userId: string | undefined): string[] {
+  if (!userId) return [];
+  return Array.from(userSocketMap[userId] ?? []);
 }
 
-const userSocketMap: Record<string, string> = {}; // #1 GLOBAL ONLY for online users
+const userSocketMap: Record<string, Set<string>> = {}; // userId -> active socket ids
+
+const getOnlineUserIds = () => Object.keys(userSocketMap);
 
 io.on('connection', (socket: AuthedSocket) => {
   if (!socket.user || !socket.userId) {
@@ -45,26 +45,32 @@ io.on('connection', (socket: AuthedSocket) => {
   console.log('A new client connected', socket.user.fullName);
 
   const userId = socket.userId;
-  userSocketMap[userId] = socket.id; // {userId: socketId}
+  userSocketMap[userId] ??= new Set<string>();
+  userSocketMap[userId].add(socket.id);
 
   // send event to all connected clients about online users
-  io.emit('getOnlineUsers', Object.keys(userSocketMap));
+  io.emit('getOnlineUsers', getOnlineUserIds());
 
   //With socket.on you can listen to events from the client
   socket.on('disconnect', async () => {
-    // Implement lastSeen
-    try {
-      await User.findByIdAndUpdate(socket.userId, {
-        lastSeen: new Date(),
-      });
-    } catch (error) {
-      console.error('Unable to update online status');
-    }
-
     console.log('Client disconnected', socket.user?.fullName);
 
-    delete userSocketMap[userId];
-    io.emit('getOnlineUsers', Object.keys(userSocketMap));
+    userSocketMap[userId]?.delete(socket.id);
+    const isUserOffline = !userSocketMap[userId]?.size;
+    if (isUserOffline) {
+      delete userSocketMap[userId];
+
+      // Implement lastSeen only after the user's final socket disconnects.
+      try {
+        await User.findByIdAndUpdate(socket.userId, {
+          lastSeen: new Date(),
+        });
+      } catch (error) {
+        console.error('Unable to update online status');
+      }
+    }
+
+    io.emit('getOnlineUsers', getOnlineUserIds());
   });
 });
 

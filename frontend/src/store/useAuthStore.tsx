@@ -140,15 +140,15 @@ export const useAuthStore = create<StoreState>((set, get) => ({
   logout: async () => {
     try {
       await axiosInstance.post('/auth/logout');
-      set({ authUser: null });
       toast.success('Logged off successfully');
-      get().disconnectSocket();
     } catch (error: unknown) {
       handleError(error, 'Logout failed');
 
       console.error('Logout error:', error);
       toast.error('Logout failed');
+    } finally {
       set({ authUser: null });
+      get().disconnectSocket();
     }
   },
 
@@ -168,7 +168,11 @@ export const useAuthStore = create<StoreState>((set, get) => ({
 
   connectSocket: () => {
     const { authUser } = get();
-    if (!authUser || get().socket?.connected) return;
+    const existingSocket = get().socket;
+    if (!authUser || existingSocket?.connected) return;
+
+    existingSocket?.removeAllListeners();
+    existingSocket?.disconnect();
 
     const socket = io(BASE_URL, {
       withCredentials: true, // Ensures cookies are sent with the connection
@@ -177,6 +181,14 @@ export const useAuthStore = create<StoreState>((set, get) => ({
 
     socket.on('connect', () => {
       console.log('Socket connected:', socket.id);
+    });
+
+    socket.on('disconnect', () => {
+      set({ onlineUsers: [] });
+    });
+
+    socket.on('connect_error', () => {
+      set({ socket: null, onlineUsers: [] });
     });
 
     set({ socket });
@@ -189,11 +201,15 @@ export const useAuthStore = create<StoreState>((set, get) => ({
   disconnectSocket: () => {
     const socket = get().socket;
 
-    if (socket?.connected) {
+    if (socket) {
       socket.off('getOnlineUsers');
       socket.off('connect');
+      socket.off('disconnect');
+      socket.off('connect_error');
       socket.disconnect();
     }
+
+    set({ socket: null, onlineUsers: [] });
   },
 
   changePassword: async (data: ChangePasswordData) => {
@@ -202,8 +218,6 @@ export const useAuthStore = create<StoreState>((set, get) => ({
       changePasswordError: '',
       changePasswordSuccess: false,
     });
-    console.log(data);
-
     try {
       await axiosInstance.post('/auth/change-password', data);
       set({ changePasswordSuccess: true, changePasswordError: '' });
