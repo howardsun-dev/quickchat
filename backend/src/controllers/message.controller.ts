@@ -5,7 +5,9 @@ import User from '../models/User.ts';
 import cloudinary from '../lib/cloudinary.ts';
 import { getReceiverSocketId, io } from '../lib/socket.ts';
 
-export const getAlLContacts = async (req: Request, res: Response) => {
+const MESSAGES_PER_PAGE = 50;
+
+export const getAllContacts = async (req: Request, res: Response) => {
   try {
     const loggedInUserId = req.user._id;
     const filteredUsers = await User.find({
@@ -14,7 +16,8 @@ export const getAlLContacts = async (req: Request, res: Response) => {
 
     res.status(200).json(filteredUsers);
   } catch (error) {
-    console.log('Error fetching getAlLContacts:', error);
+    console.log('Error fetching getAllContacts:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -22,15 +25,32 @@ export const getMessagesByUserId = async (req: Request, res: Response) => {
   try {
     const myId = req.user._id;
     const { id: userToChatId } = req.params;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const skip = (page - 1) * MESSAGES_PER_PAGE;
 
     const messages = await Message.find({
       $or: [
         { senderId: myId, receiverId: userToChatId },
         { senderId: userToChatId, receiverId: myId },
       ],
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(MESSAGES_PER_PAGE);
+
+    const total = await Message.countDocuments({
+      $or: [
+        { senderId: myId, receiverId: userToChatId },
+        { senderId: userToChatId, receiverId: myId },
+      ],
     });
 
-    res.status(200).json(messages);
+    res.status(200).json({
+      messages: messages.reverse(),
+      hasMore: skip + MESSAGES_PER_PAGE < total,
+      page,
+      total,
+    });
   } catch (error) {
     console.log('Error fetching messages by user ID:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -60,7 +80,6 @@ export const sentMessage = async (req: Request, res: Response) => {
 
     let imageUrl;
     if (image) {
-      // upload base64 image to cloudinary and get url
       const uploadResponse = await cloudinary.uploader.upload(image);
       imageUrl = uploadResponse.secure_url;
     }
@@ -82,7 +101,7 @@ export const sentMessage = async (req: Request, res: Response) => {
     res.status(201).json(newMessage);
   } catch (error) {
     if (error instanceof Error) {
-      console.log('Error in sendMEssage controller: ', error.message);
+      console.log('Error in sendMessage controller: ', error.message);
     } else {
       console.log('Error in sendMessage controller: ', error);
     }
@@ -95,23 +114,18 @@ export const getChatPartners = async (req: Request, res: Response) => {
   try {
     const loggedInUserId = (req.user as { _id: string })._id;
 
-    // find all the messages where the logged-in user is either sender or receiver
-    const messages = await Message.find({
-      $or: [{ senderId: loggedInUserId }, { receiverId: loggedInUserId }],
+    // Use MongoDB aggregation to efficiently get distinct chat partners
+    const partnerIds = await Message.distinct('senderId', {
+      receiverId: loggedInUserId,
+    });
+    const sentToIds = await Message.distinct('receiverId', {
+      senderId: loggedInUserId,
     });
 
-    const chatPartnerIds = [
-      ...new Set(
-        messages.map((msg) =>
-          msg.senderId.toString() === loggedInUserId.toString()
-            ? msg.receiverId.toString()
-            : msg.senderId.toString()
-        )
-      ),
-    ];
+    const allPartnerIds = [...new Set([...partnerIds, ...sentToIds])];
 
     const chatPartners = await User.find({
-      _id: { $in: chatPartnerIds },
+      _id: { $in: allPartnerIds },
     }).select('-password');
 
     res.status(200).json(chatPartners);
@@ -119,7 +133,7 @@ export const getChatPartners = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       console.error('Error in getChatPartners: ', error.message);
     } else {
-      console.log('Error in sendMessage controller: ', error);
+      console.log('Error in getChatPartners: ', error);
     }
     res.status(500).json({ error: 'Internal server error' });
   }

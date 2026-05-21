@@ -16,13 +16,22 @@ function ChatsList() {
 
   if (isUsersLoading) return <UsersLoadingSkeleton />;
   if (chats.length === 0) return <NoChatsFound />;
+
   return (
-    <>
+    <div className="space-y-2" role="list" aria-label="Chat list">
       {chats.map((chat: ChatPartner) => (
         <div
           key={chat._id}
-          className="bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
+          tabIndex={0}
+          role="listitem"
+          className="bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
           onClick={() => setSelectedUser(chat)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setSelectedUser(chat);
+            }
+          }}
         >
           <div className="flex items-center gap-3">
             <div
@@ -31,7 +40,7 @@ function ChatsList() {
               <div className="size-12 rounded-full">
                 <img
                   src={chat.profilePic || '/avatar.png'}
-                  alt={chat.fullName}
+                  alt={`${chat.fullName}'s avatar`}
                 />
               </div>
             </div>
@@ -41,7 +50,7 @@ function ChatsList() {
           </div>
         </div>
       ))}
-    </>
+    </div>
   );
 }
 

@@ -51,6 +51,16 @@ io.on('connection', (socket: AuthedSocket) => {
   io.emit('getOnlineUsers', Object.keys(userSocketMap));
 
   //With socket.on you can listen to events from the client
+  socket.on('typing', ({ receiverId, isTyping }) => {
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('userTyping', {
+        userId: socket.userId,
+        isTyping,
+      });
+    }
+  });
+
   socket.on('disconnect', async () => {
     // Implement lastSeen
     try {
