@@ -38,7 +38,7 @@ const initialState = {
   isMessagesLoading: false,
   lastSeenDate: null,
   isSoundEnabled: false,
-  typingUsers: {},
+  typingUserId: null,
 };
 
 const resetStore = async () => {
@@ -68,7 +68,7 @@ describe('useChatStore', () => {
     useChatStore.setState({ selectedUser: user });
     get.mockResolvedValueOnce({ data: [{ _id: 'stale-message' }] });
 
-    const promise = useChatStore.getState().getMessages('old-user');
+    const promise = useChatStore.getState().getMessagesByUserId('old-user');
     useChatStore.setState({ selectedUser: { ...user, _id: 'new-user' } });
     await promise;
 

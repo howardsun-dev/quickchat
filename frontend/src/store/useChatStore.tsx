@@ -160,9 +160,6 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
         params: { page },
       });
 
-      // Guard: abort if the selected user changed while we were fetching
-      if (get().selectedUser?._id !== userId) return;
-
       set({
         messages: isInitial
           ? res.data.messages

@@ -2,46 +2,43 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import ChatContainer from './ChatContainer';
 
-const getMessages = vi.fn();
+const getMessagesByUserId = vi.fn();
 const subscribeToMessages = vi.fn();
 const unsubscribeFromMessages = vi.fn();
+const subscribeToTyping = vi.fn();
+const unsubscribeFromTyping = vi.fn();
 
 vi.mock('../store/useChatStore', () => ({
   useChatStore: () => ({
     selectedUser: { _id: 'them', fullName: 'Howard', email: 'h@example.com', profilePic: '', lastSeen: null },
-    getMessages,
+    getMessagesByUserId,
     messages: [],
     isMessagesLoading: false,
-    hasMoreMessages: false,
-    currentPage: 1,
-    typingUsers: { them: true },
+    typingUserId: 'them',
     subscribeToMessages,
     unsubscribeFromMessages,
-    getUserStatus: () => null,
+    subscribeToTyping,
+    unsubscribeFromTyping,
   }),
 }));
 
 vi.mock('../store/useAuthStore', () => ({
-  useAuthStore: () => ({ authUser: { _id: 'me' }, onlineUsers: [] }),
+  useAuthStore: () => ({ authUser: { _id: 'me' } }),
 }));
 
 vi.mock('./ChatHeader', () => ({ default: () => <div>Chat header</div> }));
 vi.mock('./MessageInput', () => ({ default: () => <div>Message input</div> }));
+vi.mock('./NoChatHistoryPlaceholder', () => ({ default: () => <div>No history</div> }));
 vi.mock('./MessagesLoadingSkeleton', () => ({ default: () => <div>Loading</div> }));
 
 describe('ChatContainer typing indicator', () => {
-  it('shows typing indicator when the selected user is typing', () => {
-    render(<ChatContainer />);
-
-    expect(screen.getByText('Howard is typing...')).toBeInTheDocument();
-  });
-
-  it('subscribes to messages on mount and unsubscribes on unmount', () => {
+  it('subscribes to typing events and shows when the selected user is typing', () => {
     const { unmount } = render(<ChatContainer />);
 
-    expect(subscribeToMessages).toHaveBeenCalledOnce();
+    expect(subscribeToTyping).toHaveBeenCalledOnce();
+    expect(screen.getByText('Howard is typing...')).toBeInTheDocument();
 
     unmount();
-    expect(unsubscribeFromMessages).toHaveBeenCalledOnce();
+    expect(unsubscribeFromTyping).toHaveBeenCalledOnce();
   });
 });
