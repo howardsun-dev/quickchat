@@ -14,6 +14,7 @@ vi.mock('../lib/handleError', () => ({
 const authState = {
   authUser: { _id: 'me', fullName: 'Me', email: 'me@example.com', profilePic: '', lastSeen: '' },
   socket: null as null | {
+    emit?: ReturnType<typeof vi.fn>;
     off: ReturnType<typeof vi.fn>;
     on: ReturnType<typeof vi.fn>;
   },
@@ -37,6 +38,7 @@ const initialState = {
   isMessagesLoading: false,
   lastSeenDate: null,
   isSoundEnabled: false,
+  typingUserId: null,
 };
 
 const resetStore = async () => {

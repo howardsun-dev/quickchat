@@ -40,6 +40,7 @@ interface ChatState {
   isMessagesLoading: boolean;
   lastSeenDate: null | string;
   isSoundEnabled: boolean;
+  typingUserId: string | null;
 }
 
 const getStoredSoundPreference = () => {
@@ -60,6 +61,10 @@ interface ChatActions {
   sendMessage: (messageData: SentMessagePayload) => Promise<void>;
   subscribeToMessages: () => void;
   unsubscribeFromMessages: () => void;
+  sendTyping: () => void;
+  stopTyping: () => void;
+  subscribeToTyping: () => void;
+  unsubscribeFromTyping: () => void;
   getUserStatus: () => string | null;
 }
 
@@ -75,6 +80,7 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   isMessagesLoading: false,
   lastSeenDate: null,
   isSoundEnabled: getStoredSoundPreference(),
+  typingUserId: null,
 
   toggleSound: () => {
     localStorage.setItem('isSoundEnabled', String(!get().isSoundEnabled));
@@ -221,6 +227,43 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket?.off('newMessage');
+  },
+
+  sendTyping: () => {
+    const { selectedUser } = get();
+    const socket = useAuthStore.getState().socket;
+    if (!selectedUser?._id || !socket?.connected) return;
+
+    socket.emit('typing:start', { receiverId: selectedUser._id });
+  },
+
+  stopTyping: () => {
+    const { selectedUser } = get();
+    const socket = useAuthStore.getState().socket;
+    if (!selectedUser?._id || !socket?.connected) return;
+
+    socket.emit('typing:stop', { receiverId: selectedUser._id });
+  },
+
+  subscribeToTyping: () => {
+    const socket = useAuthStore.getState().socket;
+    socket?.off('typing:start');
+    socket?.off('typing:stop');
+    socket?.on('typing:start', ({ senderId }: { senderId: string }) => {
+      if (senderId !== get().selectedUser?._id) return;
+      set({ typingUserId: senderId });
+    });
+    socket?.on('typing:stop', ({ senderId }: { senderId: string }) => {
+      if (senderId !== get().typingUserId) return;
+      set({ typingUserId: null });
+    });
+  },
+
+  unsubscribeFromTyping: () => {
+    const socket = useAuthStore.getState().socket;
+    socket?.off('typing:start');
+    socket?.off('typing:stop');
+    set({ typingUserId: null });
   },
 
   getUserStatus: () => {

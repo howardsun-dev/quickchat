@@ -12,8 +12,11 @@ function ChatContainer() {
     getMessagesByUserId,
     messages,
     isMessagesLoading,
+    typingUserId,
     subscribeToMessages,
     unsubscribeFromMessages,
+    subscribeToTyping,
+    unsubscribeFromTyping,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef<HTMLDivElement>(null);
@@ -22,14 +25,20 @@ function ChatContainer() {
     if (!selectedUser?._id) return;
     getMessagesByUserId(selectedUser._id);
     subscribeToMessages();
+    subscribeToTyping();
 
     //cleanup
-    return () => unsubscribeFromMessages();
+    return () => {
+      unsubscribeFromMessages();
+      unsubscribeFromTyping();
+    };
   }, [
     selectedUser?._id,
     getMessagesByUserId,
     subscribeToMessages,
     unsubscribeFromMessages,
+    subscribeToTyping,
+    unsubscribeFromTyping,
   ]);
 
   useEffect(() => {
@@ -72,12 +81,24 @@ function ChatContainer() {
               </div>
             ))}
             {/* scroll to latest msg */}
+            {typingUserId === selectedUser._id && (
+              <p className="text-sm text-slate-400 italic" role="status">
+                {selectedUser.fullName} is typing...
+              </p>
+            )}
             <div ref={messageEndRef} />
           </div>
         ) : isMessagesLoading ? (
           <MessagesLoadingSkeleton />
         ) : (
-          <NoChatHistoryPlaceholder name={selectedUser?.fullName} />
+          <>
+            <NoChatHistoryPlaceholder name={selectedUser?.fullName} />
+            {typingUserId === selectedUser._id && (
+              <p className="text-sm text-slate-400 italic text-center" role="status">
+                {selectedUser.fullName} is typing...
+              </p>
+            )}
+          </>
         )}
       </div>
       <MessageInput />

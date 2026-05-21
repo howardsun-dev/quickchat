@@ -4,11 +4,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MessageInput from './MessageInput';
 
 const sendMessage = vi.fn();
+const sendTyping = vi.fn();
+const stopTyping = vi.fn();
 let isSoundEnabled = false;
 const playRandomKeyStrokeSound = vi.fn();
 
 vi.mock('../store/useChatStore', () => ({
-  useChatStore: () => ({ sendMessage, isSoundEnabled }),
+  useChatStore: () => ({ sendMessage, sendTyping, stopTyping, isSoundEnabled }),
 }));
 
 vi.mock('../hooks/useKeyboardSound', () => ({

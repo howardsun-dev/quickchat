@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useKeyboardSound from '../hooks/useKeyboardSound';
 import { useChatStore } from '../store/useChatStore';
 import toast from 'react-hot-toast';
@@ -10,7 +10,23 @@ function MessageInput() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { sendMessage, isSoundEnabled } = useChatStore();
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { sendMessage, sendTyping, stopTyping, isSoundEnabled } = useChatStore();
+
+  const scheduleStopTyping = () => {
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      stopTyping();
+      typingTimeoutRef.current = null;
+    }, 1500);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      stopTyping();
+    };
+  }, [stopTyping]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +34,9 @@ function MessageInput() {
     if (isSoundEnabled) playRandomKeyStrokeSound();
 
     sendMessage({ text: text.trim(), image: imagePreview });
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = null;
+    stopTyping();
     setText('');
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -74,7 +93,16 @@ function MessageInput() {
           type="text"
           value={text}
           onChange={(e) => {
-            setText(e.target.value);
+            const nextText = e.target.value;
+            setText(nextText);
+            if (nextText.trim()) {
+              sendTyping();
+              scheduleStopTyping();
+            } else {
+              if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+              typingTimeoutRef.current = null;
+              stopTyping();
+            }
             if (isSoundEnabled) {
               playRandomKeyStrokeSound();
             }

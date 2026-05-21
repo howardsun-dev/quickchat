@@ -51,8 +51,27 @@ io.on('connection', (socket: AuthedSocket) => {
   // send event to all connected clients about online users
   io.emit('getOnlineUsers', getOnlineUserIds());
 
+  socket.on('typing:start', ({ receiverId }: { receiverId?: string }) => {
+    getReceiverSocketIds(receiverId).forEach((socketId) => {
+      io.to(socketId).emit('typing:start', { senderId: userId });
+    });
+  });
+
+  socket.on('typing:stop', ({ receiverId }: { receiverId?: string }) => {
+    getReceiverSocketIds(receiverId).forEach((socketId) => {
+      io.to(socketId).emit('typing:stop', { senderId: userId });
+    });
+  });
+
   //With socket.on you can listen to events from the client
   socket.on('disconnect', async () => {
+    Object.keys(userSocketMap).forEach((receiverId) => {
+      if (receiverId === userId) return;
+      getReceiverSocketIds(receiverId).forEach((socketId) => {
+        io.to(socketId).emit('typing:stop', { senderId: userId });
+      });
+    });
+
     console.log('Client disconnected', socket.user?.fullName);
 
     userSocketMap[userId]?.delete(socket.id);
