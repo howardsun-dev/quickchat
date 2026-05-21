@@ -1,104 +1,191 @@
 # QuickChat
 
-A full-stack real-time chat application built with React, Node.js, Socket.IO, and MongoDB. Features JWT authentication, optimistic UI updates, online/offline presence detection, and secure media uploads.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Sevalla-6C5CE7)](https://quickchat-v72jh.sevalla.app/)
+[![MIT License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
 
-[QuickChat](https://quickchat-v72jh.sevalla.app/)
+A full-stack real-time chat application with JWT authentication, optimistic UI updates, online presence detection, and secure media uploads.
+
+> Built with React, Node.js, Express, Socket.IO, MongoDB, and TypeScript.
 
 ---
 
 ## Features
 
-- **Real-time messaging** via Socket.IO WebSocket connections
-- **JWT authentication** with secure session handling
-- **Optimistic UI updates** for a responsive, low-latency feel
-- **Online/offline presence detection** across connected users
-- **Media uploads** via Cloudinary integration
-- **Rate limiting & bot protection** via Arcjet
-- **Responsive UI** built with Tailwind CSS and DaisyUI
+- **Real-time messaging** — WebSocket-powered chat via Socket.IO with sub-second delivery
+- **JWT authentication** — Secure login, signup, session management, and password reset flow
+- **Optimistic UI updates** — Messages appear instantly in the UI before the server confirms delivery
+- **Online presence** — Real-time online/offline detection with `lastSeen` tracking
+- **Media uploads** — Image and file attachments stored via Cloudinary
+- **Rate limiting & bot protection** — Arcjet shields the API from abuse
+- **Responsive design** — Tailwind CSS + DaisyUI, works on desktop and mobile
+- **Keyboard sound effects** — Optional audio feedback while typing
+- **Forgot / reset password** — Email-based password recovery via Resend
 
----
+## Architecture
 
-## Tech Stack
+![Architecture Diagram](https://excalidraw.com/#json=JwKDclbwls3OlS8_aU59l,4iiiypHTpFIY25fQ3lx1sw)
 
-**Frontend**
-- React
-- Zustand (state management)
-- Socket.IO client
-- Tailwind CSS + DaisyUI
+*Click the link above to view the interactive architecture diagram on Excalidraw.*
 
-**Backend**
-- Node.js + Express
-- Socket.IO
-- MongoDB + Mongoose
-- Cloudinary (media storage)
-- Arcjet (rate limiting & request protection)
-- JSON Web Tokens (JWT)
+### Overview
 
----
+```
+┌──────────────┐    HTTP REST    ┌──────────────┐    Mongoose    ┌────────────┐
+│   React App  │ ◄──────────────► │  Express API  │ ◄────────────► │  MongoDB   │
+│   (Vite)     │                  │  (Node.js)    │               │  (Atlas)   │
+│              │    WebSocket     │               │               └────────────┘
+│  Zustand +   │ ◄──────────────► │  Socket.IO    │ ┌──────────────────────────┐
+│  Socket.IO   │                  │  (presence)   │ │  Cloudinary · Resend ·   │
+│  Client      │                  │               │ │  Arcjet (external svcs)  │
+└──────────────┘                  └──────────────┘ └──────────────────────────┘
+```
+
+### Frontend
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Framework | React 19 + Vite + TypeScript | SPA with fast HMR |
+| State | Zustand | Global stores for auth and chat state |
+| Routing | React Router | Client-side navigation |
+| HTTP | Axios | REST API calls with cookies |
+| Real-time | Socket.IO Client | WebSocket messaging, presence |
+| Styling | Tailwind CSS + DaisyUI | Responsive, component-ready UI |
+| Auth | useAuthStore | JWT token handling, session check |
+
+### Backend
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Server | Node.js + Express | REST API, static file serving (prod) |
+| Database | MongoDB + Mongoose | User profiles, messages |
+| Real-time | Socket.IO | Bidirectional event-based communication |
+| Auth | JWT (jsonwebtoken) | Token-based authentication with cookies |
+| Email | Resend | Password reset emails |
+| Media | Cloudinary | Image/file uploads and transformations |
+| Security | Arcjet | Rate limiting, bot detection |
+| Validation | Zod (via Arcjet) | Request validation |
+
+### Data Flow (Sending a Message)
+
+1. User types and sends → React updates UI **optimistically** via Zustand
+2. Axios POSTs to `/api/messages/send/:id`
+3. Express stores the message in MongoDB via Mongoose
+4. Socket.IO emits `newMessage` event to the recipient
+5. Recipient's app receives the event → Zustand updates → UI re-renders
+
+Online status, typing indicators, and unread counts all flow through the same Socket.IO channel.
 
 ## Project Structure
 
 ```
 /
-├── backend/        # Express server, Socket.IO, REST API
-├── frontend/       # React client
-├── package.json    # Root scripts (build, start, test)
+├── backend/               # Express API server
+│   └── src/
+│       ├── controllers/   # Route handlers (auth, messages, users)
+│       ├── middlewares/    # JWT auth, socket auth, Arcjet
+│       ├── models/        # Mongoose schemas (User, Message)
+│       ├── routes/        # Express route definitions
+│       ├── lib/           # DB, Socket.IO, Cloudinary, email config
+│       └── server.ts      # Entry point
+├── frontend/              # React SPA
+│   └── src/
+│       ├── pages/         # Route-level components
+│       ├── components/    # Reusable UI components
+│       ├── store/         # Zustand stores (auth, chat)
+│       ├── hooks/         # Custom hooks (keyboard sounds)
+│       ├── lib/           # Axios instance, error helpers
+│       └── App.tsx        # Root component with routing
+├── package.json           # Root scripts (build, start, test)
 └── README.md
 ```
-
----
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js v20+
-- npm
-- MongoDB instance (local or Atlas)
-- Cloudinary account
-- Arcjet account
+- Node.js 20+
+- MongoDB instance (local or [Atlas](https://www.mongodb.com/atlas))
+- [Cloudinary](https://cloudinary.com/) account
+- [Arcjet](https://arcjet.com/) account
+- [Resend](https://resend.com/) account (for password reset emails)
 
 ### Environment Variables
 
-Create a `.env` file in the `backend/` directory. Reference `ENV.ts` for the full list of required variables. At minimum you will need:
+Create a `.env` file in `backend/` with the following:
 
+```bash
+MONGODB_URI=           # MongoDB connection string
+JWT_SECRET=            # Secret key for JWT signing
+CLOUDINARY_CLOUD_NAME= # Cloudinary cloud name
+CLOUDINARY_API_KEY=    # Cloudinary API key
+CLOUDINARY_API_SECRET= # Cloudinary API secret
+ARCJET_KEY=            # Arcjet API key
+RESEND_API_KEY=        # Resend API key (password reset)
+PORT=                  # Server port (default: 3000)
 ```
-MONGODB_URI=
-JWT_SECRET=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-ARCJET_KEY=
-PORT=
-```
+
+See `backend/src/lib/env.ts` for the full list of required variables.
 
 ### Install & Run
 
 ```bash
 # Install all dependencies
-npm run build
+npm install
 
-# Start the backend server
+# Start in production mode (serves frontend from backend)
 npm start
 ```
 
-Or run frontend and backend separately during development:
+**Development mode** (separate terminals):
 
 ```bash
-# Backend
+# Terminal 1 — Backend
 cd backend
 npm install
 npm run dev
 
-# Frontend (in a separate terminal)
+# Terminal 2 — Frontend
 cd frontend
 npm install
 npm run dev
 ```
 
-The backend must be running before starting the frontend.
+The backend must be running before starting the frontend. In development, the frontend proxies API calls to `localhost:3000`.
 
----
+### Register Commands (Discord)
+
+Not applicable to QuickChat — use the web interface at the live demo URL.
+
+## API Endpoints
+
+### Authentication — `/api/auth`
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/signup` | No | Create a new account |
+| POST | `/login` | No | Sign in |
+| POST | `/logout` | No | Clear session |
+| GET | `/check` | JWT | Verify active session |
+| POST | `/forgot-password` | No | Send reset email |
+| POST | `/reset-password/:token` | No | Reset password with token |
+| POST | `/change-password` | JWT | Change password (authenticated) |
+| PUT | `/update-profile` | JWT | Update display name, avatar, etc. |
+
+### Messages — `/api/messages`
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/contacts` | JWT | List all contacts |
+| GET | `/chats` | JWT | List recent conversations |
+| GET | `/:id` | JWT | Get messages with a specific user |
+| POST | `/send/:id` | JWT | Send a message to a user |
+
+### Users — `/api/user`
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/status/:id` | JWT | Get user online/lastSeen status |
 
 ## Testing
 
@@ -106,9 +193,11 @@ The backend must be running before starting the frontend.
 npm test
 ```
 
-Tests are run with Vitest.
+Tests are run with [Vitest](https://vitest.dev/).
 
----
+## Deployment
+
+QuickChat is deployed on [Sevalla](https://sevalla.app/). The production build serves the React frontend as static files from the Express server.
 
 ## License
 
