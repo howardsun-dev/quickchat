@@ -17,9 +17,8 @@ function App() {
     checkAuth();
   }, [checkAuth]);
 
-  console.log(authUser);
-
   if (isCheckingAuth) return <PageLoader />;
+
   return (
     <div className="min-h-screen bg-slate-900 relative flex items-center justify-center p-4 overflow-hidden">
       {/* DECORATORS - GRID BG & GLOW SHAPES */}
@@ -30,15 +29,15 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={authUser ? <ChatPage /> : <Navigate to={'/login'} />}
+          element={authUser ? <ChatPage /> : <Navigate to="/login" />}
         />
         <Route
           path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to={'/'} />}
+          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
         />
         <Route
           path="/signup"
-          element={!authUser ? <SignUpPage /> : <Navigate to={'/'} />}
+          element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
         />
         <Route
           path="/change-password"

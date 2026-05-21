@@ -64,6 +64,15 @@ io.on('connection', (socket: AuthedSocket) => {
   });
 
   //With socket.on you can listen to events from the client
+  socket.on('typing', ({ receiverId, isTyping }) => {
+    getReceiverSocketIds(receiverId).forEach((socketId) => {
+      io.to(socketId).emit('userTyping', {
+        userId: socket.userId,
+        isTyping,
+      });
+    });
+  });
+
   socket.on('disconnect', async () => {
     Object.keys(userSocketMap).forEach((receiverId) => {
       if (receiverId === userId) return;

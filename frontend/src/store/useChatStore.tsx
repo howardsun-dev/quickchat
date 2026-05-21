@@ -30,6 +30,14 @@ interface SentMessagePayload {
   text?: string;
   image?: string | File | null;
 }
+
+interface GetMessagesResponse {
+  messages: Message[];
+  hasMore: boolean;
+  page: number;
+  total: number;
+}
+
 interface ChatState {
   allContacts: ChatPartner[];
   chats: ChatPartner[];
@@ -38,18 +46,13 @@ interface ChatState {
   selectedUser: User | null;
   isUsersLoading: boolean;
   isMessagesLoading: boolean;
+  isSendingMessage: boolean;
+  hasMoreMessages: boolean;
+  currentPage: number;
   lastSeenDate: null | string;
   isSoundEnabled: boolean;
-  typingUserId: string | null;
+  typingUsers: Record<string, boolean>;
 }
-
-const getStoredSoundPreference = () => {
-  try {
-    return localStorage.getItem('isSoundEnabled') === 'true';
-  } catch {
-    return false;
-  }
-};
 
 interface ChatActions {
   toggleSound: () => void;
@@ -57,7 +60,7 @@ interface ChatActions {
   setSelectedUser: (user: User | null) => Promise<void>;
   getAllContacts: () => Promise<void>;
   getMyChatPartners: () => Promise<void>;
-  getMessagesByUserId: (userId: string) => Promise<void>;
+  getMessages: (userId: string, options?: { page?: number }) => Promise<void>;
   sendMessage: (messageData: SentMessagePayload) => Promise<void>;
   subscribeToMessages: () => void;
   unsubscribeFromMessages: () => void;
@@ -66,6 +69,7 @@ interface ChatActions {
   subscribeToTyping: () => void;
   unsubscribeFromTyping: () => void;
   getUserStatus: () => string | null;
+  setIsTyping: (receiverId: string, isTyping: boolean) => void;
 }
 
 type ChatStoreState = ChatState & ChatActions;
@@ -78,19 +82,26 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  isSendingMessage: false,
+  hasMoreMessages: false,
+  currentPage: 1,
   lastSeenDate: null,
-  isSoundEnabled: getStoredSoundPreference(),
-  typingUserId: null,
+  isSoundEnabled: (() => {
+    const stored = localStorage.getItem('isSoundEnabled');
+    return stored !== null ? JSON.parse(stored) : false;
+  })(),
+  typingUsers: {},
 
   toggleSound: () => {
-    localStorage.setItem('isSoundEnabled', String(!get().isSoundEnabled));
-    set({ isSoundEnabled: !get().isSoundEnabled });
+    const next = !get().isSoundEnabled;
+    localStorage.setItem('isSoundEnabled', String(next));
+    set({ isSoundEnabled: next });
   },
 
   setActiveTab: (tab) => set({ activeTab: tab }),
 
   setSelectedUser: async (user: User | null) => {
-    set({ selectedUser: user, lastSeenDate: null });
+    set({ selectedUser: user, lastSeenDate: null, messages: [], currentPage: 1, hasMoreMessages: false });
 
     if (user?._id) {
       const targetUserId = user._id;
@@ -113,7 +124,6 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
 
   getAllContacts: async () => {
     set({ isUsersLoading: true });
-
     try {
       const res = await axiosInstance.get('/messages/contacts');
       set({ allContacts: res.data });
@@ -136,12 +146,27 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     }
   },
 
-  getMessagesByUserId: async (userId) => {
-    set({ isMessagesLoading: true });
+  getMessages: async (userId, options = {}) => {
+    const page = options.page ?? 1;
+    const isInitial = page === 1;
+
+    set(isInitial
+      ? { isMessagesLoading: true, messages: [], currentPage: 1 }
+      : { isMessagesLoading: true }
+    );
+
     try {
-      const res = await axiosInstance.get(`/messages/${userId}`);
-      if (get().selectedUser?._id !== userId) return;
-      set({ messages: res.data });
+      const res = await axiosInstance.get<GetMessagesResponse>(`/messages/${userId}`, {
+        params: { page },
+      });
+
+      set({
+        messages: isInitial
+          ? res.data.messages
+          : [...get().messages, ...res.data.messages],
+        hasMoreMessages: res.data.hasMore,
+        currentPage: page,
+      });
     } catch (error) {
       handleError(error, 'Failed to fetch messages');
     } finally {
@@ -158,6 +183,8 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
       return;
     }
 
+    set({ isSendingMessage: true });
+
     const tempId = `temp-${Date.now()}`;
 
     const optimisticMessage: Message = {
@@ -169,64 +196,72 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
       createdAt: new Date().toISOString(),
       isOptimistic: true,
     };
-    set({ messages: [...messages, optimisticMessage] }); // Optimistic UI update
+    set({ messages: [...messages, optimisticMessage] });
 
     if (!selectedUser?._id) {
+      set({ messages: get().messages.filter((m) => m._id !== tempId) });
       handleError(null, 'No chat selected');
       return;
     }
+
     try {
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
         messageData
       );
+      // Remove optimistic message and add real one
       set({
         messages: [
-          ...get().messages.filter((message) => message._id !== tempId),
+          ...get().messages.filter((m) => m._id !== tempId),
           res.data,
         ],
       });
     } catch (error: unknown) {
       // Remove optimistic message on failure
-      set({
-        messages: get().messages.filter((message) => message._id !== tempId),
-      });
-      handleError(error, 'Failed to send messages');
+      set({ messages: get().messages.filter((m) => m._id !== tempId) });
+      handleError(error, 'Failed to send message');
+    } finally {
+      set({ isSendingMessage: false });
     }
   },
 
   subscribeToMessages: () => {
-    /* Implementation for subscribing to messages via WebSocket or similar */
-    const { selectedUser, isSoundEnabled } = get();
-    if (!selectedUser) return;
-
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
 
-    socket?.off('newMessage');
-    socket?.on('newMessage', (newMessage) => {
+    socket.off('newMessage');
+    socket.on('newMessage', (newMessage: Message) => {
       const isMessageSentFromSelectedUser =
         newMessage.senderId === get().selectedUser?._id;
       if (!isMessageSentFromSelectedUser) return;
 
       const currentMessages = get().messages;
-      if (currentMessages.some((message) => message._id === newMessage._id)) return;
+      // Don't add if we already have this message (avoid dupes from optimistic)
+      if (currentMessages.some((m) => m._id === newMessage._id)) return;
+
       set({ messages: [...currentMessages, newMessage] });
 
-      if (isSoundEnabled) {
-        // console.log('🔊Attempting to play sound');
+      if (get().isSoundEnabled) {
         const notificationSound = new Audio('/sounds/notification.mp3');
-
         notificationSound.currentTime = 0;
         notificationSound
           .play()
           .catch((e) => console.log('Notification sound play error:', e));
       }
     });
+
+    socket.on('userTyping', ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
+      set((state) => ({
+        typingUsers: { ...state.typingUsers, [userId]: isTyping },
+      }));
+    });
   },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
-    socket?.off('newMessage');
+    if (!socket) return;
+    socket.off('newMessage');
+    socket.off('userTyping');
   },
 
   sendTyping: () => {
@@ -251,11 +286,14 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     socket?.off('typing:stop');
     socket?.on('typing:start', ({ senderId }: { senderId: string }) => {
       if (senderId !== get().selectedUser?._id) return;
-      set({ typingUserId: senderId });
+      set((state) => ({
+        typingUsers: { ...state.typingUsers, [senderId]: true },
+      }));
     });
     socket?.on('typing:stop', ({ senderId }: { senderId: string }) => {
-      if (senderId !== get().typingUserId) return;
-      set({ typingUserId: null });
+      set((state) => ({
+        typingUsers: { ...state.typingUsers, [senderId]: false },
+      }));
     });
   },
 
@@ -263,12 +301,15 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket?.off('typing:start');
     socket?.off('typing:stop');
-    set({ typingUserId: null });
   },
 
   getUserStatus: () => {
-    const { lastSeenDate } = get();
+    return get().lastSeenDate;
+  },
 
-    return lastSeenDate;
+  setIsTyping: (receiverId: string, isTyping: boolean) => {
+    const socket = useAuthStore.getState().socket;
+    if (!socket) return;
+    socket.emit('typing', { receiverId, isTyping });
   },
 }));
