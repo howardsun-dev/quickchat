@@ -6,6 +6,9 @@ import { useAuthStore } from './store/useAuthStore';
 import { useEffect } from 'react';
 import PageLoader from './components/PageLoader';
 import { Toaster } from 'react-hot-toast';
+import ChangePasswordPage from './pages/ChangePasswordPage';
+import ForgotPasswordForm from './pages/ForgotPasswordForm';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
@@ -37,6 +40,12 @@ function App() {
           path="/signup"
           element={!authUser ? <SignUpPage /> : <Navigate to={'/'} />}
         />
+        <Route
+          path="/change-password"
+          element={authUser ? <ChangePasswordPage /> : <Navigate to="/login" />}
+        />
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       </Routes>
       <Toaster />
     </div>

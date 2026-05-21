@@ -2,15 +2,16 @@ import express from 'express';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route.ts';
 import messageRoutes from './routes/messages.route.ts';
+import userRoutes from './routes/users.route.ts';
 import path from 'node:path';
 import { connectDB } from './lib/db.ts';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { ENV } from './lib/env.ts';
+import { app, server } from './lib/socket.ts';
 
 dotenv.config();
 
-const app = express();
 const __dirname = path.resolve();
 
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.use(cookieParser()); // parses cookies
 
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/user', userRoutes);
 
 // Make ready for deployment
 if (process.env.NODE_ENV == 'production') {
@@ -34,7 +36,7 @@ if (process.env.NODE_ENV == 'production') {
 async function startServer() {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server running on port: ${PORT}`);
     });
   } catch (err) {

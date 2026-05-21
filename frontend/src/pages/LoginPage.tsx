@@ -92,6 +92,11 @@ function LoginPage() {
                     Don't have an account? Sign up
                   </Link>
                 </div>
+                <div className="mt-6 text-center">
+                  <Link to="/forgot-password" className="auth-link">
+                    Forgot your password? Click here to reset
+                  </Link>
+                </div>
               </div>
             </div>
 

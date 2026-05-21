@@ -16,6 +16,6 @@ router.use(arcjetProtection, protectRoute);
 router.get('/contacts', getAlLContacts);
 router.get('/chats', getChatPartners);
 router.get('/:id', getMessagesByUserId);
-router.post('/sent/:id', sentMessage);
+router.post('/send/:id', sentMessage);
 
 export default router;
