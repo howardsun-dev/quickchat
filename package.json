@@ -9,7 +9,8 @@
   "scripts": {
     "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
     "start": "npm run start --prefix backend",
-    "test": "vitest"
+    "test": "npm run test --prefix backend && npm run test --prefix frontend && npm run build --prefix backend && npm run lint --prefix frontend && npm run build --prefix frontend",
+    "test:coverage": "npm run test:coverage --prefix backend && npm run test:coverage --prefix frontend"
   },
   "repository": {
     "type": "git",

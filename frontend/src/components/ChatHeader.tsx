@@ -54,7 +54,7 @@ function ChatHeader() {
 
       <button
         onClick={() => setSelectedUser(null)}
-        aria-label="Close chat with ${selectedUser.fullName}"
+        aria-label={`Close chat with ${selectedUser.fullName}`}
       >
         <XIcon
           className="w-5 h-5 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"

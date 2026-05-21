@@ -200,7 +200,11 @@ export const resetPassword = async (req: Request, res: Response) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const reqUser = (req as any).user;
 
-    // console.log(req);
+    if (typeof newPassword !== 'string' || typeof confirmPassword !== 'string') {
+      return res
+        .status(400)
+        .json({ error: 'New password and confirmation are required' });
+    }
 
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ error: 'Passwords do not match' });
@@ -235,7 +239,7 @@ export const resetPassword = async (req: Request, res: Response) => {
       const userId = reqUser?.id;
       const user = await User.findById(userId);
 
-      if (!currentPassword) {
+      if (typeof currentPassword !== 'string' || !currentPassword) {
         return res.status(400).json({ error: 'Current password is required' });
       }
 
