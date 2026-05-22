@@ -110,20 +110,34 @@ Online status, typing indicators, and unread counts all flow through the same So
 
 ### Environment Variables
 
-Create a `.env` file in `backend/` with the following:
+Copy the example file and fill in your local credentials:
 
 ```bash
-MONGODB_URI=           # MongoDB connection string
+cp backend/.env.example backend/.env
+```
+
+The backend reads environment variables from `backend/.env`. The most important values are:
+
+```bash
+MONGO_URI=             # MongoDB connection string
 JWT_SECRET=            # Secret key for JWT signing
 CLOUDINARY_CLOUD_NAME= # Cloudinary cloud name
 CLOUDINARY_API_KEY=    # Cloudinary API key
 CLOUDINARY_API_SECRET= # Cloudinary API secret
 ARCJET_KEY=            # Arcjet API key
-RESEND_API_KEY=        # Resend API key (password reset)
 PORT=                  # Server port (default: 3000)
+CLIENT_URL=            # Frontend origin, e.g. http://localhost:5173
 ```
 
-See `backend/src/lib/env.ts` for the full list of required variables.
+Optional password-reset email values:
+
+```bash
+RESEND_API_KEY=
+EMAIL_FROM=
+EMAIL_FROM_NAME=
+```
+
+See [`backend/.env.example`](./backend/.env.example) and `backend/src/lib/env.ts` for the full list of supported variables.
 
 ### Install & Run
 
