@@ -165,10 +165,6 @@ npm run dev
 
 The backend must be running before starting the frontend. In development, the frontend proxies API calls to `localhost:3000`.
 
-### Register Commands (Discord)
-
-Not applicable to QuickChat — use the web interface at the live demo URL.
-
 ## API Endpoints
 
 ### Authentication — `/api/auth`
